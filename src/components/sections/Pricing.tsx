@@ -170,7 +170,7 @@ export function Pricing({ isNight }: PricingProps) {
         >
           <div
             className={cn(
-              "inline-flex rounded-full p-1 border",
+              "flex flex-col sm:flex-row sm:inline-flex rounded-2xl sm:rounded-full p-1 border w-full sm:w-auto",
               isNight
                 ? "bg-white/[0.03] border-white/5"
                 : "bg-gray-100 border-gray-200/60"
@@ -204,7 +204,7 @@ export function Pricing({ isNight }: PricingProps) {
                     transition={{ type: "spring", duration: 0.4 }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center justify-center gap-2">
                   <Users className="w-3.5 h-3.5" />
                   {group.label}
                 </span>
