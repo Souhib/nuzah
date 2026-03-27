@@ -1,0 +1,129 @@
+{
+  "hero": {
+    "title": "Votre Piscine Privée",
+    "titleAccent": "à Chelles",
+    "subtitle": "Plongez dans une expérience unique — baignade, détente et ambiance LED nocturne au cœur de l'Île-de-France.",
+    "badge": "Chelles · Île-de-France",
+    "cta": "Découvrir les tarifs"
+  },
+  "experience": {
+    "sectionTitle": "L'Expérience",
+    "title": "Un espace de détente rien que pour vous",
+    "description": "Profitez d'une piscine privée dans un cadre intime et chaleureux. Que ce soit pour une après-midi entre amis, une fête familiale ou une soirée ambiance LED, chaque moment est inoubliable.",
+    "stats": {
+      "size": "6 × 3 m",
+      "sizeLabel": "Bassin",
+      "depth": "1,50 m",
+      "depthLabel": "Profondeur",
+      "capacity": "10-15",
+      "capacityLabel": "Personnes",
+      "led": "LED",
+      "ledLabel": "Ambiance nocturne"
+    },
+    "features": {
+      "private": "100% Privé",
+      "privateDesc": "Aucun autre invité — l'espace est entièrement à vous.",
+      "led": "Ambiance LED",
+      "ledDesc": "Éclairage LED immersif pour des soirées féeriques.",
+      "food": "Options Restauration",
+      "foodDesc": "Repas fait maison disponible en supplément.",
+      "music": "Enceinte Bluetooth",
+      "musicDesc": "Ambiance musicale à votre goût.",
+      "pingpong": "Table de Ping-Pong",
+      "pingpongDesc": "Pour les plus compétitifs d'entre vous.",
+      "hammock": "Hamac",
+      "hammockDesc": "Pour ceux qui préfèrent la détente absolue.",
+      "switch": "Nintendo Switch",
+      "switchDesc": "Console disponible pour des parties entre amis.",
+      "boardgames": "Jeux de société",
+      "boardgamesDesc": "Loups-Garous, Codenames, Mito et plein d'autres !"
+    }
+  },
+  "gallery": {
+    "sectionTitle": "Galerie",
+    "title": "Découvrez l'espace",
+    "dayLabel": "Ambiance jour",
+    "nightLabel": "Ambiance nuit",
+    "foodLabel": "Repas",
+    "gardenLabel": "Jardin & terrasse",
+    "foodPlatterLabel": "Plateau fait maison",
+    "foodBurgersLabel": "Mini burgers & fricassés",
+    "placeholder": "Photo à venir"
+  },
+  "howItWorks": {
+    "sectionTitle": "Comment ça marche",
+    "title": "Réservez en 3 étapes",
+    "step1": "Choisissez",
+    "step1Desc": "Sélectionnez votre créneau et le nombre de personnes.",
+    "step2": "Contactez",
+    "step2Desc": "Réservez via WhatsApp ou par téléphone.",
+    "step3": "Profitez",
+    "step3Desc": "Venez et profitez de votre moment de détente !"
+  },
+  "trust": {
+    "safety": "Sécurité certifiée",
+    "insurance": "Assuré",
+    "verified": "Hôte vérifié",
+    "clean": "Propreté garantie"
+  },
+  "location": {
+    "sectionTitle": "Accès",
+    "title": "Comment venir",
+    "address": "Chelles, 77500 — Île-de-France",
+    "transport": "RER E — ~25 min depuis Paris",
+    "parking": "Jusqu'à 3 places de parking",
+    "description": "Idéalement situé à Chelles, à seulement 25 minutes de Paris par le RER E. Jusqu'à 3 places de stationnement disponibles sur place."
+  },
+  "contact": {
+    "sectionTitle": "Contact",
+    "title": "Prêt à plonger ?",
+    "subtitle": "Contactez-nous pour réserver votre créneau. Réponse rapide garantie !",
+    "whatsappMessage": "Bonjour ! Je souhaite réserver la piscine. Date souhaitée : "
+  },
+  "faq": {
+    "sectionTitle": "FAQ",
+    "title": "Questions fréquentes",
+    "items": [
+      {
+        "q": "Quels sont les créneaux disponibles ?",
+        "a": "Nous proposons 4 créneaux de 4h : Matinée (10h–14h), Après-midi (14h–18h), Soirée (18h–22h) et Nuit (22h–02h). Si aucune réservation ne suit la vôtre, vous pouvez rester plus longtemps sans supplément."
+      },
+      {
+        "q": "Combien de personnes peuvent venir ?",
+        "a": "La piscine peut accueillir confortablement 10 personnes, avec un maximum de 15. Les tarifs varient selon la taille du groupe : jusqu'à 6, de 7 à 10, ou de 11 à 15 personnes."
+      },
+      {
+        "q": "Que faut-il apporter ?",
+        "a": "Apportez votre maillot de bain et vos serviettes. Des snacks et boissons sont offerts sur place. Tout le reste est fourni : transats, enceinte Bluetooth, jeux de société, Nintendo Switch, table de ping-pong et hamac."
+      },
+      {
+        "q": "Peut-on manger sur place ?",
+        "a": "Des snacks et boissons sont inclus dans chaque créneau. En supplément, nous proposons un repas fait maison selon l'envie du chef : un plat à 10€/personne ou un menu complet (entrée + plat + dessert) à 15€/personne. À commander 48h à l'avance, minimum 6 personnes."
+      },
+      {
+        "q": "Y a-t-il un parking ?",
+        "a": "Nous pouvons mettre à disposition jusqu'à 3 places de stationnement sur place."
+      },
+      {
+        "q": "Comment réserver ?",
+        "a": "Contactez-nous via WhatsApp ou par téléphone. Un acompte de 10€ (via Wero, Revolut ou PayPal) est demandé pour confirmer la réservation. Ce montant sera déduit du total le jour J."
+      },
+      {
+        "q": "Quelle est la politique d'annulation ?",
+        "a": "Annulation gratuite jusqu'à 24h avant le créneau. En cas d'annulation tardive, si personne n'avait réservé votre créneau pendant votre réservation, on vous rembourse quand même les 10€."
+      },
+      {
+        "q": "L'espace est-il vraiment privé ?",
+        "a": "Oui, intimité totale. Aucun vis-à-vis, personne ne peut voir la piscine. L'espace est idéal pour des moments entre amis, en famille ou entre femmes en toute sérénité."
+      },
+      {
+        "q": "Peut-on organiser une cérémonie ou un événement ?",
+        "a": "Oui ! Fêtes, célébrations familiales... nous accueillons tout type d'événement privé au bord de la piscine. Contactez-nous par WhatsApp ou message pour discuter des modalités et organiser votre événement sur mesure."
+      },
+      {
+        "q": "Proposez-vous de la nourriture à emporter ?",
+        "a": "Oui ! Que vous veniez profiter de la piscine et souhaitiez repartir avec un plateau, ou que vous vouliez simplement commander à emporter, nous préparons sur commande des mini sandwichs, mini burgers, sandwichs fricassés et bien d'autres choses. Contactez-nous par WhatsApp ou message pour passer commande et convenir des modalités."
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "sectionTitle": "Tarifs",
+  "title": "Nos formules",
+  "subtitle": "Un prix fixe par créneau, sans surprise. Si aucune réservation ne suit, restez aussi longtemps que vous le souhaitez.",
+  "privacy": {
+    "title": "Intimité totale",
+    "description": "Aucun vis-à-vis — personne ne peut voir la piscine. Idéal pour des moments entre amis, en famille ou entre femmes en toute sérénité.",
+    "women": "Groupes de femmes bienvenus — profitez d'un espace 100% privé."
+  },
+  "groups": {
+    "small": "Jusqu'à 6 personnes",
+    "medium": "7 à 10 personnes",
+    "large": "11 à 15 personnes"
+  },
+  "slots": {
+    "morning": {
+      "name": "Matinée",
+      "time": "10h – 14h",
+      "description": "Baignade au soleil, ambiance fraîche et détendue.",
+      "small": "120",
+      "medium": "140",
+      "large": "160"
+    },
+    "afternoon": {
+      "name": "Après-midi",
+      "time": "14h – 18h",
+      "description": "Le créneau idéal pour profiter du soleil au maximum.",
+      "small": "120",
+      "medium": "140",
+      "large": "160"
+    },
+    "evening": {
+      "name": "Soirée",
+      "time": "18h – 22h",
+      "description": "Coucher de soleil et transition vers l'ambiance LED.",
+      "small": "150",
+      "medium": "175",
+      "large": "200",
+      "popular": true
+    },
+    "night": {
+      "name": "Nuit",
+      "time": "22h – 02h",
+      "description": "Expérience LED immersive, ambiance unique et intime.",
+      "small": "180",
+      "medium": "210",
+      "large": "240",
+      "premium": true
+    }
+  },
+  "perSlot": "/ créneau de 4h",
+  "stayLonger": "Pas de réservation après ? Restez sans limite !",
+  "included": "Inclus dans chaque créneau",
+  "features": [
+    "Piscine privée 6×3m",
+    "Transats & mobilier de jardin",
+    "Douche & toilettes",
+    "Wi-Fi gratuit",
+    "Snacks & boissons offerts",
+    "Enceinte Bluetooth",
+    "Table de ping-pong & hamac",
+    "Nintendo Switch & jeux de société",
+    "Intimité totale — aucun vis-à-vis"
+  ],
+  "bookSlot": "Réserver ce créneau",
+  "popular": "Populaire",
+  "premium": "Expérience LED",
+  "food": {
+    "title": "Option Repas",
+    "subtitle": "Le menu selon l'envie du chef — fait maison avec amour.",
+    "notice": "À commander 48h à l'avance · Minimum 6 personnes",
+    "perPerson": "/personne",
+    "items": [
+      {
+        "name": "Plat",
+        "description": "Un plat fait maison, selon l'inspiration du chef",
+        "price": "10"
+      },
+      {
+        "name": "Entrée + Plat + Dessert",
+        "description": "Le menu complet pour une expérience gourmande",
+        "price": "15"
+      }
+    ]
+  },
+  "events": {
+    "title": "Cérémonies & Événements",
+    "subtitle": "Fêtes, célébrations...",
+    "description": "Vous souhaitez organiser une cérémonie ou un événement privé au bord de la piscine ? Fêtes entre amis, célébrations familiales... Tout est possible ! Profitez d'un espace privatif avec piscine, restauration sur place et un cadre idéal pour créer des souvenirs inoubliables. Contactez-nous directement par WhatsApp ou message pour discuter des modalités et organiser votre événement sur mesure.",
+    "examplesCeremonies": "Cérémonies : diplômes, fiançailles, aqiqas...",
+    "examplesFestivals": "Fêtes : soirées privées, hennés...",
+    "cta": "Nous contacter"
+  },
+  "takeaway": {
+    "title": "Commandes à emporter",
+    "subtitle": "Préparées maison, à récupérer sur place.",
+    "description": "Envie de repartir avec un plateau de gourmandises après votre baignade, ou simplement commander sans réserver la piscine ? Nous préparons sur commande des mini sandwichs, mini burgers, sandwichs fricassés et bien d'autres choses. Contactez-nous par WhatsApp ou message pour passer commande et convenir des modalités.",
+    "examplesSavoury": "Salé : mini sandwichs, mini burgers, sandwichs fricassés et plus",
+    "examplesSweet": "Sucré : crêpes, beignets et plus",
+    "cta": "Commander"
+  },
+  "booking": {
+    "title": "Réservation & Annulation",
+    "deposit": "Un acompte de 10€ est demandé pour confirmer votre réservation, via Wero, Revolut ou PayPal. Ce montant sera déduit du total le jour J.",
+    "cancel": "Annulation gratuite jusqu'à 24h avant le créneau.",
+    "cancelLate": "Annulation tardive ? Si personne n'avait réservé votre créneau pendant votre réservation, on vous rembourse quand même les 10€. On reste humains.",
+    "methods": "Wero · Revolut · PayPal"
+  }
+}

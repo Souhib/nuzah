@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "experience": "التجربة",
+    "gallery": "المعرض",
+    "pricing": "الأسعار",
+    "howItWorks": "كيف يعمل",
+    "location": "الموقع",
+    "contact": "اتصل بنا",
+    "faq": "الأسئلة الشائعة"
+  },
+  "cta": {
+    "book": "احجز الآن",
+    "whatsapp": "احجز عبر واتساب",
+    "call": "اتصل بنا",
+    "learnMore": "اعرف المزيد"
+  },
+  "theme": {
+    "day": "نهار",
+    "night": "ليل"
+  },
+  "language": {
+    "fr": "Français",
+    "en": "English",
+    "ar": "العربية"
+  },
+  "footer": {
+    "legal": "الإشعار القانوني",
+    "privacy": "سياسة الخصوصية",
+    "terms": "الشروط والأحكام",
+    "rights": "جميع الحقوق محفوظة",
+    "madeWith": "صنع بـ",
+    "inChelles": "في Chelles · نزهة"
+  }
+}

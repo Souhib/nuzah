@@ -1,0 +1,109 @@
+{
+  "sectionTitle": "Pricing",
+  "title": "Our packages",
+  "subtitle": "A fixed price per slot, no surprises. If there's no booking after yours, stay as long as you want.",
+  "privacy": {
+    "title": "Total privacy",
+    "description": "No overlooking neighbours — nobody can see the pool. Perfect for moments with friends, family, or women-only groups in complete serenity.",
+    "women": "Women-only groups welcome — enjoy a 100% private space."
+  },
+  "groups": {
+    "small": "Up to 6 people",
+    "medium": "7 to 10 people",
+    "large": "11 to 15 people"
+  },
+  "slots": {
+    "morning": {
+      "name": "Morning",
+      "time": "10am – 2pm",
+      "description": "Sunny swim, fresh and relaxed vibes.",
+      "small": "120",
+      "medium": "140",
+      "large": "160"
+    },
+    "afternoon": {
+      "name": "Afternoon",
+      "time": "2pm – 6pm",
+      "description": "The perfect slot to make the most of the sunshine.",
+      "small": "120",
+      "medium": "140",
+      "large": "160"
+    },
+    "evening": {
+      "name": "Evening",
+      "time": "6pm – 10pm",
+      "description": "Sunset vibes and the LED ambiance kicks in.",
+      "small": "150",
+      "medium": "175",
+      "large": "200",
+      "popular": true
+    },
+    "night": {
+      "name": "Night",
+      "time": "10pm – 2am",
+      "description": "Immersive LED experience, unique and intimate atmosphere.",
+      "small": "180",
+      "medium": "210",
+      "large": "240",
+      "premium": true
+    }
+  },
+  "perSlot": "/ 4-hour slot",
+  "stayLonger": "No booking after? Stay as long as you want!",
+  "included": "Included in every slot",
+  "features": [
+    "Private pool 6×3m",
+    "Loungers & garden furniture",
+    "Shower & restroom",
+    "Free Wi-Fi",
+    "Complimentary snacks & drinks",
+    "Bluetooth speaker",
+    "Ping-pong table & hammock",
+    "Nintendo Switch & board games",
+    "Total privacy — no overlooking"
+  ],
+  "bookSlot": "Book this slot",
+  "popular": "Popular",
+  "premium": "LED Experience",
+  "food": {
+    "title": "Meal Add-on",
+    "subtitle": "Chef's choice menu — homemade with love.",
+    "notice": "Order 48h in advance · Minimum 6 people",
+    "perPerson": "/person",
+    "items": [
+      {
+        "name": "Main course",
+        "description": "A homemade dish, inspired by the chef's mood",
+        "price": "10"
+      },
+      {
+        "name": "Starter + Main + Dessert",
+        "description": "The full menu for a gourmet experience",
+        "price": "15"
+      }
+    ]
+  },
+  "events": {
+    "title": "Ceremonies & Events",
+    "subtitle": "Parties, celebrations...",
+    "description": "Want to host a ceremony or private event by the pool? Parties with friends, family celebrations... Anything is possible! Enjoy a private space with pool, on-site catering and the perfect setting to create unforgettable memories. Contact us directly via WhatsApp or message to discuss the details and plan your custom event.",
+    "examplesCeremonies": "Ceremonies: graduations, engagements, aqiqas...",
+    "examplesFestivals": "Parties: private evenings, henna nights...",
+    "cta": "Contact us"
+  },
+  "takeaway": {
+    "title": "Takeaway Orders",
+    "subtitle": "Homemade, ready to pick up.",
+    "description": "Want to take home a platter of treats after your swim, or simply order without booking the pool? We prepare on order mini sandwiches, mini burgers, fricassé sandwiches and many more. Contact us via WhatsApp or message to place your order and arrange the details.",
+    "examplesSavoury": "Savoury: mini sandwiches, mini burgers, fricassé sandwiches & more",
+    "examplesSweet": "Sweet: crêpes, doughnuts & more",
+    "cta": "Order now"
+  },
+  "booking": {
+    "title": "Booking & Cancellation",
+    "deposit": "A €10 deposit is required to confirm your booking, via Wero, Revolut or PayPal. This amount will be deducted from the total on the day.",
+    "cancel": "Free cancellation up to 24 hours before the slot.",
+    "cancelLate": "Late cancellation? If no one had booked your slot during your reservation, we'll refund the €10 anyway. We keep it fair.",
+    "methods": "Wero · Revolut · PayPal"
+  }
+}

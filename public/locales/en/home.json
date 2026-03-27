@@ -1,0 +1,129 @@
+{
+  "hero": {
+    "title": "Your Private Pool",
+    "titleAccent": "in Chelles",
+    "subtitle": "Dive into a unique experience — swimming, relaxation and LED night ambiance in the heart of Île-de-France.",
+    "badge": "Chelles · Île-de-France",
+    "cta": "View pricing"
+  },
+  "experience": {
+    "sectionTitle": "The Experience",
+    "title": "A relaxation space just for you",
+    "description": "Enjoy a private pool in an intimate and welcoming setting. Whether it's an afternoon with friends, a family celebration or an LED night party, every moment is unforgettable.",
+    "stats": {
+      "size": "6 × 3 m",
+      "sizeLabel": "Pool",
+      "depth": "1.50 m",
+      "depthLabel": "Depth",
+      "capacity": "10-15",
+      "capacityLabel": "People",
+      "led": "LED",
+      "ledLabel": "Night ambiance"
+    },
+    "features": {
+      "private": "100% Private",
+      "privateDesc": "No other guests — the space is entirely yours.",
+      "led": "LED Ambiance",
+      "ledDesc": "Immersive LED lighting for magical evenings.",
+      "food": "Food Options",
+      "foodDesc": "Homemade meals available as add-ons.",
+      "music": "Bluetooth Speaker",
+      "musicDesc": "Set the mood with your own playlist.",
+      "pingpong": "Ping-Pong Table",
+      "pingpongDesc": "For the competitive ones among you.",
+      "hammock": "Hammock",
+      "hammockDesc": "For those who prefer absolute relaxation.",
+      "switch": "Nintendo Switch",
+      "switchDesc": "Console available for gaming sessions with friends.",
+      "boardgames": "Board Games",
+      "boardgamesDesc": "Werewolf, Codenames, Mito and many more!"
+    }
+  },
+  "gallery": {
+    "sectionTitle": "Gallery",
+    "title": "Discover the space",
+    "dayLabel": "Daytime vibe",
+    "nightLabel": "Night vibe",
+    "foodLabel": "Food",
+    "gardenLabel": "Garden & terrace",
+    "foodPlatterLabel": "Homemade platter",
+    "foodBurgersLabel": "Mini burgers & fricassés",
+    "placeholder": "Photo coming soon"
+  },
+  "howItWorks": {
+    "sectionTitle": "How It Works",
+    "title": "Book in 3 steps",
+    "step1": "Choose",
+    "step1Desc": "Select your time slot and number of guests.",
+    "step2": "Contact",
+    "step2Desc": "Book via WhatsApp or phone.",
+    "step3": "Enjoy",
+    "step3Desc": "Come and enjoy your relaxation time!"
+  },
+  "trust": {
+    "safety": "Certified safety",
+    "insurance": "Insured",
+    "verified": "Verified host",
+    "clean": "Guaranteed cleanliness"
+  },
+  "location": {
+    "sectionTitle": "Location",
+    "title": "How to get here",
+    "address": "Chelles, 77500 — Île-de-France",
+    "transport": "RER E — ~25 min from Paris",
+    "parking": "Up to 3 parking spots",
+    "description": "Ideally located in Chelles, just 25 minutes from Paris via the RER E line. Up to 3 parking spots available on site."
+  },
+  "contact": {
+    "sectionTitle": "Contact",
+    "title": "Ready to dive in?",
+    "subtitle": "Contact us to book your slot. Quick response guaranteed!",
+    "whatsappMessage": "Hello! I'd like to book the pool. Preferred date: "
+  },
+  "faq": {
+    "sectionTitle": "FAQ",
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "q": "What time slots are available?",
+        "a": "We offer 4 slots of 4 hours: Morning (10am–2pm), Afternoon (2pm–6pm), Evening (6pm–10pm) and Night (10pm–2am). If there's no booking after yours, you can stay longer at no extra charge."
+      },
+      {
+        "q": "How many people can come?",
+        "a": "The pool comfortably accommodates 10 people, with a maximum of 15. Pricing varies by group size: up to 6, 7 to 10, or 11 to 15 people."
+      },
+      {
+        "q": "What should I bring?",
+        "a": "Bring your swimsuit and towels. Snacks and drinks are provided on site. Everything else is included: loungers, Bluetooth speaker, board games, Nintendo Switch, ping-pong table and hammock."
+      },
+      {
+        "q": "Can we eat on site?",
+        "a": "Snacks and drinks are included in every slot. As an add-on, we offer a homemade meal by the chef: a main course at €10/person or a full menu (starter + main + dessert) at €15/person. Order 48h in advance, minimum 6 people."
+      },
+      {
+        "q": "Is there parking?",
+        "a": "We can provide up to 3 parking spots on site."
+      },
+      {
+        "q": "How do I book?",
+        "a": "Contact us via WhatsApp or phone. A €10 deposit (via Wero, Revolut or PayPal) is required to confirm your booking. This amount will be deducted from the total on the day."
+      },
+      {
+        "q": "What is the cancellation policy?",
+        "a": "Free cancellation up to 24 hours before the slot. For late cancellations, if no one had booked your slot during your reservation, we'll refund the €10 anyway."
+      },
+      {
+        "q": "Is the space truly private?",
+        "a": "Yes, total privacy. No overlooking neighbours, nobody can see the pool. The space is perfect for moments with friends, family or women-only groups in complete serenity."
+      },
+      {
+        "q": "Can I host a ceremony or event?",
+        "a": "Yes! Parties, family celebrations... we welcome all types of private events by the pool. Contact us via WhatsApp or message to discuss the details and plan your custom event."
+      },
+      {
+        "q": "Do you offer takeaway food?",
+        "a": "Yes! Whether you're enjoying the pool and want to take home a platter, or simply ordering without a pool booking, we prepare on order mini sandwiches, mini burgers, fricassé sandwiches and many more. Contact us via WhatsApp or message to place your order and arrange the details."
+      }
+    ]
+  }
+}

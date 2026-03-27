@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <!-- Pool water circle -->
+  <circle cx="24" cy="24" r="22" fill="#02BAD6" />
+  <circle cx="24" cy="24" r="22" fill="url(#gradient)" />
+
+  <!-- Water waves -->
+  <path d="M6 26c3-3 6-3 9 0s6 3 9 0 6-3 9 0 6 3 9 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M6 32c3-3 6-3 9 0s6 3 9 0 6-3 9 0 6 3 9 0" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- LED glow dot -->
+  <circle cx="24" cy="18" r="4" fill="white" opacity="0.9"/>
+  <circle cx="24" cy="18" r="6" fill="white" opacity="0.2"/>
+
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+</svg>

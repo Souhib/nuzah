@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+*.mov
+*.MOV
+thumb_*.jpg
+IMG_*.jpg
+README.md
+CLAUDE.md
+.DS_Store
+.claude
