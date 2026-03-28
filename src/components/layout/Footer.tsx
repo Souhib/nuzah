@@ -26,7 +26,7 @@ export function Footer({ isNight }: FooterProps) {
                 isNight ? "text-white" : "text-[#0A1628]"
               )}
             >
-              Nuz<span className="text-[#02BAD6]">ha</span>
+              Nooz<span className="text-[#02BAD6]">ha</span>
             </span>
           </div>
 

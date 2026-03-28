@@ -83,7 +83,7 @@ export function Header({ isNight, onToggleTheme }: HeaderProps) {
                 isNight ? "text-white" : "text-[#0A1628]"
               )}
             >
-              Nuz<span className="text-[#02BAD6]">ha</span>
+              Nooz<span className="text-[#02BAD6]">ha</span>
             </span>
           </button>
 

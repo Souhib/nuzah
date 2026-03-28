@@ -27,7 +27,7 @@ services:
     ports:
       - "31847:80"
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
     networks:
       - dokploy-network
     logging: *default-logging
