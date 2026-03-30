@@ -28,3 +28,4 @@ dist-ssr
 *.MOV
 thumb_*.jpg
 IMG_*.jpg
+.playwright-mcp/
