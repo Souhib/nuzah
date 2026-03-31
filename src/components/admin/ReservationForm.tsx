@@ -1,5 +1,7 @@
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { DayPicker } from "react-day-picker";
+import { fr } from "react-day-picker/locale";
 import {
   type Column,
   type TableSchema,
@@ -55,6 +57,84 @@ interface SectionCardProps {
   icon: React.ElementType;
   title: string;
   children: React.ReactNode;
+}
+
+function formatDateDisplay(isoDate: string): string {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function DatePickerField({
+  date,
+  setDate,
+}: {
+  date: string;
+  setDate: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selected = date ? new Date(date + "T00:00:00") : undefined;
+
+  return (
+    <div className="block" ref={ref}>
+      <span className="text-gray-400 text-sm mb-1.5 block">Date *</span>
+      <div className="relative">
+        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={cn(
+            inputClass,
+            "pl-11 text-left cursor-pointer w-full",
+            !date && "text-gray-600",
+          )}
+        >
+          {date ? formatDateDisplay(date) : "JJ/MM/AAAA"}
+        </button>
+        {open && (
+          <div className="absolute z-50 mt-2 left-0 bg-gray-900 border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/50 p-3">
+            <DayPicker
+              mode="single"
+              locale={fr}
+              selected={selected}
+              onSelect={(d) => {
+                if (d) {
+                  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                  setDate(iso);
+                }
+                setOpen(false);
+              }}
+              classNames={{
+                months: "flex flex-col",
+                month_caption: "flex justify-center items-center mb-2",
+                caption_label: "text-sm font-medium text-gray-200",
+                nav: "flex items-center justify-between absolute top-3 left-3 right-3",
+                button_previous: "p-1 rounded-lg hover:bg-white/[0.08] text-gray-400 cursor-pointer",
+                button_next: "p-1 rounded-lg hover:bg-white/[0.08] text-gray-400 cursor-pointer",
+                weekday: "text-xs font-medium text-gray-500 w-9 h-8",
+                day: "w-9 h-9 text-sm text-gray-300 rounded-lg",
+                day_button: "w-full h-full rounded-lg hover:bg-[#02BAD6]/20 hover:text-white transition-colors cursor-pointer flex items-center justify-center",
+                selected: "!bg-[#02BAD6] !text-white",
+                today: "font-bold text-[#02BAD6]",
+                outside: "text-gray-600 opacity-50",
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <input type="hidden" name="date" value={date} required />
+    </div>
+  );
 }
 
 function SectionCard({ icon: Icon, title, children }: SectionCardProps) {
@@ -328,19 +408,7 @@ export function ReservationForm({
 
         <SectionCard icon={Calendar} title="Reservation">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="block">
-              <span className="text-gray-400 text-sm mb-1.5 block">Date *</span>
-              <div className="relative">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className={cn(inputClass, "pl-11")}
-                />
-              </div>
-            </label>
+            <DatePickerField date={date} setDate={setDate} />
             <label className="block">
               <span className="text-gray-400 text-sm mb-1.5 block">Creneau *</span>
               <div className="relative">
