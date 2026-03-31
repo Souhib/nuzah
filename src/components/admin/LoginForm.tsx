@@ -1,6 +1,8 @@
 import { type FormEvent, useState } from "react";
 import { cn } from "@/lib/utils";
 import { signin } from "@/lib/nocodb";
+import { AlertCircle, Loader2, Lock, LogIn, Mail, Waves } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 interface LoginFormProps {
   onLogin: (token: string) => void;
@@ -31,54 +33,87 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-dvh bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gray-950 bg-[radial-gradient(ellipse_at_top,rgba(2,186,214,0.08)_0%,transparent_50%)] flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-gray-900 rounded-xl p-8 shadow-lg"
+        className="relative w-full max-w-sm bg-gradient-to-b from-white/[0.07] to-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-8 shadow-2xl shadow-black/50"
       >
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Noozha Admin
-        </h1>
+        <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#02BAD6]/50 to-transparent" />
 
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-900/50 border border-red-700 text-red-300 text-sm">
-            {error}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-[#02BAD6]/10 flex items-center justify-center mb-4">
+            <Waves className="w-7 h-7 text-[#02BAD6]" />
           </div>
-        )}
+          <h1 className="text-2xl font-bold text-white glow-text-cyan font-heading">
+            Noozha
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">Espace administration</p>
+        </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <label className="block mb-4">
-          <span className="text-gray-400 text-sm mb-1 block">Email</span>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none"
-            placeholder="admin@noozha.fr"
-          />
+          <span className="text-gray-400 text-sm mb-1.5 block">Email</span>
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-gray-800/50 border border-white/[0.08] text-gray-50 placeholder-gray-600 rounded-xl pl-11 pr-4 py-3 focus:border-[#02BAD6] focus:ring-2 focus:ring-[#02BAD6]/20 focus:outline-none hover:border-white/[0.15] transition-colors"
+              placeholder="admin@noozha.fr"
+            />
+          </div>
         </label>
 
         <label className="block mb-6">
-          <span className="text-gray-400 text-sm mb-1 block">Mot de passe</span>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none"
-          />
+          <span className="text-gray-400 text-sm mb-1.5 block">Mot de passe</span>
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-gray-800/50 border border-white/[0.08] text-gray-50 placeholder-gray-600 rounded-xl pl-11 pr-4 py-3 focus:border-[#02BAD6] focus:ring-2 focus:ring-[#02BAD6]/20 focus:outline-none hover:border-white/[0.15] transition-colors"
+            />
+          </div>
         </label>
 
-        <button
+        <motion.button
           type="submit"
           disabled={loading}
+          whileTap={{ scale: 0.98 }}
           className={cn(
-            "w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium rounded-lg py-2.5 transition-colors",
+            "w-full bg-[#02BAD6] hover:bg-[#00d4f5] text-white font-medium rounded-xl py-3 transition-colors flex items-center justify-center gap-2",
             loading && "opacity-60 cursor-not-allowed",
           )}
         >
-          {loading ? "Connexion..." : "Se connecter"}
-        </button>
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Connexion...
+            </>
+          ) : (
+            <>
+              <LogIn className="w-4 h-4" />
+              Se connecter
+            </>
+          )}
+        </motion.button>
       </form>
     </div>
   );
