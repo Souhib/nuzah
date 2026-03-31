@@ -148,7 +148,9 @@ export function ReservationForm({
     setSuccess(false);
     setSubmitting(true);
 
-    // Map créneau to start/end hours
+    // Map créneau to start/end hours (Paris time with explicit offset)
+    // Summer: UTC+2, Winter: UTC+1. Use +02:00 for summer (pool season)
+    const TZ = "+02:00";
     const creneauHours: Record<string, [string, string]> = {
       "10": ["10:00", "14:00"],
       "14": ["14:00", "18:00"],
@@ -161,21 +163,20 @@ export function ReservationForm({
 
     const c = creneau.toLowerCase();
     if (c.includes("journ")) {
-      startDateTime = `${date} 10:00`;
-      endDateTime = `${date} 22:00`;
+      startDateTime = `${date}T10:00:00${TZ}`;
+      endDateTime = `${date}T22:00:00${TZ}`;
     } else {
       const hourKey = Object.keys(creneauHours).find((k) => creneau.includes(k));
       if (hourKey) {
         const [startH, endH] = creneauHours[hourKey];
-        startDateTime = `${date} ${startH}`;
-        // Handle night slot crossing midnight
+        startDateTime = `${date}T${startH}:00${TZ}`;
         if (endH === "02:00") {
           const nextDay = new Date(date);
           nextDay.setDate(nextDay.getDate() + 1);
           const nd = nextDay.toISOString().split("T")[0];
-          endDateTime = `${nd} ${endH}`;
+          endDateTime = `${nd}T${endH}:00${TZ}`;
         } else {
-          endDateTime = `${date} ${endH}`;
+          endDateTime = `${date}T${endH}:00${TZ}`;
         }
       }
     }
