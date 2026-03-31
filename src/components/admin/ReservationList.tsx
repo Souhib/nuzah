@@ -49,9 +49,16 @@ const DISPLAY_COLUMNS = [
   "Statut",
 ] as const;
 
+function normalize(str: string): string {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function findField(record: NocoDBRecord, search: string): unknown {
-  const lower = search.toLowerCase();
-  const key = Object.keys(record).find((k) => k.toLowerCase() === lower);
+  const norm = normalize(search);
+  const key = Object.keys(record).find((k) => normalize(k) === norm);
   return key ? record[key] : undefined;
 }
 
