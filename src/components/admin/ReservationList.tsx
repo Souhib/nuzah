@@ -66,8 +66,8 @@ function StatutBadge({ value }: { value: string }) {
 function formatDate(raw: string): string {
   try {
     return new Date(raw).toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "short",
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
     });
   } catch {
