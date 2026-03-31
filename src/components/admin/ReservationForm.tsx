@@ -148,10 +148,43 @@ export function ReservationForm({
     setSuccess(false);
     setSubmitting(true);
 
+    // Map créneau to start/end hours
+    const creneauHours: Record<string, [string, string]> = {
+      "10": ["10:00", "14:00"],
+      "14": ["14:00", "18:00"],
+      "18": ["18:00", "22:00"],
+      "22": ["22:00", "02:00"],
+    };
+
+    let startDateTime = date;
+    let endDateTime = date;
+
+    const c = creneau.toLowerCase();
+    if (c.includes("journ")) {
+      startDateTime = `${date} 10:00`;
+      endDateTime = `${date} 22:00`;
+    } else {
+      const hourKey = Object.keys(creneauHours).find((k) => creneau.includes(k));
+      if (hourKey) {
+        const [startH, endH] = creneauHours[hourKey];
+        startDateTime = `${date} ${startH}`;
+        // Handle night slot crossing midnight
+        if (endH === "02:00") {
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const nd = nextDay.toISOString().split("T")[0];
+          endDateTime = `${nd} ${endH}`;
+        } else {
+          endDateTime = `${date} ${endH}`;
+        }
+      }
+    }
+
     const record: Record<string, unknown> = {
       [getColumnTitle(columns, "Client")]: client,
       [getColumnTitle(columns, "Telephone")]: telephone,
-      [getColumnTitle(columns, "Date")]: date,
+      [getColumnTitle(columns, "Date")]: startDateTime,
+      [getColumnTitle(columns, "Fin")]: endDateTime,
       [getColumnTitle(columns, "Creneau")]: creneau,
       [getColumnTitle(columns, "Nb personnes")]: nbPersonnes,
       [getColumnTitle(columns, "Formule")]: formule,
