@@ -9,6 +9,8 @@ import {
   type FoodFormula,
   type PriceBreakdown,
   type Reservation,
+  type ReservationCreate,
+  type ReservationUpdate,
   SLOT_LABELS,
   type Slot,
   STATUS_LABELS,
@@ -521,9 +523,9 @@ export function ReservationForm({
       }
 
       if (isEdit && initial) {
-        await api.reservations.update(token, initial.id, payload);
+        await api.reservations.update(token, initial.id, payload as ReservationUpdate);
       } else {
-        await api.reservations.create(token, payload);
+        await api.reservations.create(token, payload as unknown as ReservationCreate);
       }
       setSuccess(true);
       resetForm();
