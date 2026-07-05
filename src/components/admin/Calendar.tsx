@@ -92,6 +92,24 @@ function addDays(date: Date, n: number): Date {
   return d;
 }
 
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+}
+
+function addMonths(date: Date, n: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + n, 1, 0, 0, 0, 0);
+}
+
+function isSameMonth(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+/** Build the 42-cell (6×7) grid starting Monday of the week containing the 1st of `monthStart`. */
+function buildMonthGrid(monthStart: Date): Date[] {
+  const gridStart = startOfWeek(monthStart);
+  return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
+}
+
 function isoDate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -111,6 +129,11 @@ function formatWeekHeader(monday: Date): string {
     return `${monday.getDate()} – ${sunday.getDate()} ${MONTH_NAMES[monday.getMonth()]} ${monday.getFullYear()}`;
   }
   return `${monday.getDate()} ${MONTH_NAMES[monday.getMonth()]} – ${sunday.getDate()} ${MONTH_NAMES[sunday.getMonth()]} ${sunday.getFullYear()}`;
+}
+
+function formatMonthHeader(monthStart: Date): string {
+  const name = MONTH_NAMES[monthStart.getMonth()]!;
+  return `${name.charAt(0).toUpperCase() + name.slice(1)} ${monthStart.getFullYear()}`;
 }
 
 function formatTime(iso: string): string {
@@ -150,20 +173,28 @@ function bucketByDay(monday: Date, reservations: Reservation[]): DayBucket[] {
 }
 
 export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: CalendarProps) {
+  const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [monday, setMonday] = useState(() => startOfWeek(new Date()));
+  const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Reservation | null>(null);
 
+  // Range fetched depends on the active view.
+  const range = useMemo(() => {
+    if (viewMode === "week") {
+      return { from: monday, to: addDays(monday, 6) };
+    }
+    const grid = buildMonthGrid(month);
+    return { from: grid[0]!, to: grid[grid.length - 1]! };
+  }, [viewMode, monday, month]);
+
   const load = useCallback(() => {
     setLoading(true);
     setError("");
     api.reservations
-      .list(token, {
-        from: isoDate(monday),
-        to: isoDate(addDays(monday, 6)),
-      })
+      .list(token, { from: isoDate(range.from), to: isoDate(range.to) })
       .then((res) => setReservations(res.reservations))
       .catch((err) => {
         if (err instanceof UnauthorizedError) onUnauthorized();
@@ -171,7 +202,7 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
         else setError("Erreur de chargement.");
       })
       .finally(() => setLoading(false));
-  }, [token, monday, onUnauthorized]);
+  }, [token, range.from, range.to, onUnauthorized]);
 
   useEffect(() => {
     load();
@@ -182,6 +213,10 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
   const isCurrentWeek = useMemo(
     () => isSameDay(monday, startOfWeek(today)),
     [monday, today],
+  );
+  const isCurrentMonth = useMemo(
+    () => isSameMonth(month, startOfMonth(today)),
+    [month, today],
   );
 
   const weekStats = useMemo(() => {
@@ -212,14 +247,38 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
 
   return (
     <div className="space-y-4">
-      {/* Header: week navigation */}
+      {/* Header: view toggle + navigation */}
       <div className="bg-gray-900/50 border border-white/[0.08] rounded-2xl p-4 sm:p-5">
+        {/* View toggle */}
+        <div className="mb-3 flex justify-center">
+          <div className="inline-flex p-1 rounded-xl bg-gray-800/50 border border-white/[0.06]">
+            {(["week", "month"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setViewMode(m)}
+                className={cn(
+                  "px-4 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                  viewMode === m
+                    ? "bg-[#02BAD6] text-white shadow"
+                    : "text-gray-400 hover:text-white",
+                )}
+              >
+                {m === "week" ? "Semaine" : "Mois"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => setMonday((m) => addDays(m, -7))}
+            onClick={() => {
+              if (viewMode === "week") setMonday((m) => addDays(m, -7));
+              else setMonth((m) => addMonths(m, -1));
+            }}
             className="w-10 h-10 rounded-xl border border-white/[0.08] text-gray-300 hover:border-[#02BAD6] hover:text-[#02BAD6] transition-colors flex items-center justify-center"
-            aria-label="Semaine précédente"
+            aria-label={viewMode === "week" ? "Semaine précédente" : "Mois précédent"}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -227,24 +286,27 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
           <div className="flex-1 min-w-0 text-center">
             <div className="flex items-center justify-center gap-2 text-gray-400 text-xs uppercase tracking-wider mb-0.5">
               <CalendarDays className="w-3.5 h-3.5" />
-              <span>Semaine</span>
+              <span>{viewMode === "week" ? "Semaine" : "Mois"}</span>
             </div>
             <p className="text-white font-semibold text-sm sm:text-base truncate">
-              {formatWeekHeader(monday)}
+              {viewMode === "week" ? formatWeekHeader(monday) : formatMonthHeader(month)}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => setMonday((m) => addDays(m, 7))}
+            onClick={() => {
+              if (viewMode === "week") setMonday((m) => addDays(m, 7));
+              else setMonth((m) => addMonths(m, 1));
+            }}
             className="w-10 h-10 rounded-xl border border-white/[0.08] text-gray-300 hover:border-[#02BAD6] hover:text-[#02BAD6] transition-colors flex items-center justify-center"
-            aria-label="Semaine suivante"
+            aria-label={viewMode === "week" ? "Semaine suivante" : "Mois suivant"}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {!isCurrentWeek && (
+        {viewMode === "week" && !isCurrentWeek && (
           <div className="mt-3 flex justify-center">
             <button
               type="button"
@@ -252,6 +314,17 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
               className="text-xs text-[#02BAD6] hover:text-[#00d4f5] underline"
             >
               Revenir à aujourd'hui
+            </button>
+          </div>
+        )}
+        {viewMode === "month" && !isCurrentMonth && (
+          <div className="mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setMonth(startOfMonth(today))}
+              className="text-xs text-[#02BAD6] hover:text-[#00d4f5] underline"
+            >
+              Revenir au mois en cours
             </button>
           </div>
         )}
@@ -300,7 +373,22 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
         </div>
       )}
 
-      {/* Days */}
+      {/* --- MONTH view --- */}
+      {viewMode === "month" && (
+        <MonthGrid
+          monthStart={month}
+          reservations={reservations}
+          today={today}
+          loading={loading}
+          onDayClick={(date) => {
+            setViewMode("week");
+            setMonday(startOfWeek(date));
+          }}
+        />
+      )}
+
+      {/* --- WEEK view --- */}
+      {viewMode === "week" && (
       <div
         className="space-y-2.5 select-none touch-pan-y"
         onTouchStart={onTouchStart}
@@ -400,6 +488,7 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
               );
             })}
       </div>
+      )}
 
       {/* Detail modal */}
       <AnimatePresence>
@@ -797,6 +886,126 @@ function TimeStrip({
         <span>18h</span>
         <span>22h</span>
         <span>02h</span>
+      </div>
+    </div>
+  );
+}
+
+function MonthGrid({
+  monthStart,
+  reservations,
+  today,
+  loading,
+  onDayClick,
+}: {
+  monthStart: Date;
+  reservations: Reservation[];
+  today: Date;
+  loading: boolean;
+  onDayClick: (date: Date) => void;
+}) {
+  const grid = useMemo(() => buildMonthGrid(monthStart), [monthStart]);
+
+  // Index reservations by ISO date (local) for O(1) lookup per cell.
+  const byDay = useMemo(() => {
+    const m = new Map<string, Reservation[]>();
+    for (const r of reservations) {
+      const d = new Date(r.start_at);
+      const key = isoDate(
+        new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+      );
+      const arr = m.get(key) ?? [];
+      arr.push(r);
+      m.set(key, arr);
+    }
+    return m;
+  }, [reservations]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-7 gap-1.5">
+        {Array.from({ length: 42 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-square rounded-lg bg-gray-900/50 border border-white/[0.06] animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Weekday header */}
+      <div className="grid grid-cols-7 gap-1.5 mb-1.5">
+        {DAY_NAMES.map((d) => (
+          <div
+            key={d}
+            className="text-center text-[10px] uppercase tracking-wider text-gray-500 font-medium"
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1.5">
+        {grid.map((date) => {
+          const inMonth = isSameMonth(date, monthStart);
+          const isToday = isSameDay(date, today);
+          const key = isoDate(date);
+          const list = (byDay.get(key) ?? []).filter(
+            (r) => r.status !== "cancelled",
+          );
+          const dots = list.slice(0, 4);
+          const overflow = list.length - dots.length;
+
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onDayClick(date)}
+              className={cn(
+                "aspect-square rounded-lg border p-1.5 flex flex-col justify-between transition-colors text-left",
+                inMonth
+                  ? "bg-gray-900/40 border-white/[0.06] hover:border-[#02BAD6]/40"
+                  : "bg-gray-900/20 border-white/[0.03] text-gray-600",
+                isToday && "bg-[#02BAD6]/[0.06] border-[#02BAD6]/40",
+              )}
+            >
+              <span
+                className={cn(
+                  "text-xs font-semibold tabular-nums leading-none",
+                  isToday
+                    ? "text-[#02BAD6]"
+                    : inMonth
+                      ? "text-gray-200"
+                      : "text-gray-600",
+                )}
+              >
+                {date.getDate()}
+              </span>
+
+              {list.length > 0 && (
+                <div className="flex items-end gap-0.5 flex-wrap">
+                  {dots.map((r) => (
+                    <span
+                      key={r.id}
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        STATUS_COLORS[r.status].dot,
+                      )}
+                    />
+                  ))}
+                  {overflow > 0 && (
+                    <span className="text-[9px] text-gray-500 leading-none ml-0.5">
+                      +{overflow}
+                    </span>
+                  )}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
