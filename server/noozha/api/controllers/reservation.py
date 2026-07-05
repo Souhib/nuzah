@@ -49,8 +49,13 @@ class ReservationController:
         from_iso: str | None = None,
         to_iso: str | None = None,
         status: str | None = None,
+        customer_phone: str | None = None,
+        customer_name: str | None = None,
     ) -> list[Reservation]:
-        """List reservations, optionally filtered by start_at range + status."""
+        """List reservations, optionally filtered by start_at range, status,
+        and customer identity. `customer_phone` matches exactly (best signal);
+        `customer_name` uses case-insensitive substring match (fallback when
+        no phone is on file)."""
         conditions = []
         if from_iso:
             conditions.append(
@@ -64,6 +69,17 @@ class ReservationController:
             )
         if status:
             conditions.append(Reservation.status == status)
+        if customer_phone:
+            conditions.append(Reservation.customer_phone == customer_phone)
+        elif customer_name:
+            # `.ilike` is a SQLAlchemy column operator; `ty` sees `str` and
+            # trips — provably a false positive here (the class attribute is
+            # a Column at runtime, only the instance attribute is `str`).
+            conditions.append(
+                Reservation.customer_name.ilike(  # ty: ignore[unresolved-attribute]
+                    f"%{customer_name}%"
+                )
+            )
         stmt = select(Reservation)
         if conditions:
             stmt = stmt.where(and_(*conditions))

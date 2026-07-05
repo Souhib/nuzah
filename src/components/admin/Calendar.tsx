@@ -19,6 +19,7 @@ import {
   Clock,
   Euro,
   HandCoins,
+  History,
   Loader2,
   Pencil,
   Sparkles,
@@ -35,6 +36,7 @@ interface CalendarProps {
   onUnauthorized: () => void;
   refreshKey: number;
   onEdit: (reservation: Reservation) => void;
+  onViewCustomer: (customer: { name: string; phone: string }) => void;
 }
 
 const SLOT_ICONS: Record<Slot, typeof Sun> = {
@@ -172,7 +174,13 @@ function bucketByDay(monday: Date, reservations: Reservation[]): DayBucket[] {
   return days;
 }
 
-export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: CalendarProps) {
+export function Calendar({
+  token,
+  onUnauthorized,
+  refreshKey,
+  onEdit,
+  onViewCustomer,
+}: CalendarProps) {
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [monday, setMonday] = useState(() => startOfWeek(new Date()));
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
@@ -515,6 +523,11 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
               setSelected(null);
               onEdit(r);
             }}
+            onViewCustomer={() => {
+              const r = selected;
+              setSelected(null);
+              onViewCustomer({ name: r.customer_name, phone: r.customer_phone });
+            }}
             onUnauthorized={onUnauthorized}
           />
         )}
@@ -535,6 +548,7 @@ function DetailModal({
   onClose,
   onChanged,
   onEdit,
+  onViewCustomer,
   onUnauthorized,
 }: {
   reservation: Reservation;
@@ -542,6 +556,7 @@ function DetailModal({
   onClose: () => void;
   onChanged: (updated: Reservation | null) => void;
   onEdit: () => void;
+  onViewCustomer: () => void;
   onUnauthorized: () => void;
 }) {
   const colors = STATUS_COLORS[r.status];
@@ -606,7 +621,18 @@ function DetailModal({
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
               {SLOT_LABELS[r.slot].name} · {formatTime(r.start_at)}–{formatTime(r.end_at)}
             </p>
-            <h3 className="text-xl font-semibold text-white">{r.customer_name}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xl font-semibold text-white">{r.customer_name}</h3>
+              <button
+                type="button"
+                onClick={onViewCustomer}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#02BAD6]/10 text-[#02BAD6] hover:bg-[#02BAD6]/20 border border-[#02BAD6]/20 transition-colors uppercase tracking-wider"
+                title="Voir l'historique de ce client"
+              >
+                <History className="w-3 h-3" />
+                Historique
+              </button>
+            </div>
             {r.customer_phone && (
               <a
                 href={`tel:${r.customer_phone}`}

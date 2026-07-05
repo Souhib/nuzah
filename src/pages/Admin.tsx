@@ -5,6 +5,7 @@ import { LoginForm } from "@/components/admin/LoginForm";
 import { ReservationForm } from "@/components/admin/ReservationForm";
 import { ReservationList } from "@/components/admin/ReservationList";
 import { Calendar } from "@/components/admin/Calendar";
+import { CustomerDetail, type CustomerKey } from "@/components/admin/CustomerDetail";
 import { CalendarDays, List, Loader2, LogOut, Pencil, Plus, Waves } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -18,6 +19,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
   const [refreshKey, setRefreshKey] = useState(0);
   const [editing, setEditing] = useState<Reservation | null>(null);
+  const [viewingCustomer, setViewingCustomer] = useState<CustomerKey | null>(null);
 
   // Validate any stored token by calling /me. Failure → clear + show login.
   useEffect(() => {
@@ -138,6 +140,7 @@ export default function Admin() {
                 onUnauthorized={handleUnauthorized}
                 refreshKey={refreshKey}
                 onEdit={setEditing}
+                onViewCustomer={setViewingCustomer}
               />
             </motion.div>
           )}
@@ -169,6 +172,7 @@ export default function Admin() {
                 onUnauthorized={handleUnauthorized}
                 refreshKey={refreshKey}
                 onEdit={setEditing}
+                onViewCustomer={setViewingCustomer}
               />
             </motion.div>
           )}
@@ -212,6 +216,23 @@ export default function Admin() {
               />
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Customer history overlay */}
+      <AnimatePresence>
+        {viewingCustomer && (
+          <CustomerDetail
+            key={`${viewingCustomer.phone}|${viewingCustomer.name}`}
+            customer={viewingCustomer}
+            token={token}
+            onClose={() => setViewingCustomer(null)}
+            onUnauthorized={handleUnauthorized}
+            onOpenReservation={(r) => {
+              setViewingCustomer(null);
+              setEditing(r);
+            }}
+          />
         )}
       </AnimatePresence>
     </div>

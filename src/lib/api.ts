@@ -207,7 +207,13 @@ export const api = {
   reservations: {
     list: (
       token: string,
-      filters: { from?: string; to?: string; status?: Status } = {},
+      filters: {
+        from?: string;
+        to?: string;
+        status?: Status;
+        customer_phone?: string;
+        customer_name?: string;
+      } = {},
     ) =>
       request<{ reservations: Reservation[] }>("GET", "/api/v1/reservations", {
         token,

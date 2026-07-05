@@ -15,6 +15,7 @@ import {
   CircleCheck,
   Clock,
   Euro,
+  History,
   Loader2,
   Trash2,
 } from "lucide-react";
@@ -25,6 +26,7 @@ interface ReservationListProps {
   onUnauthorized: () => void;
   refreshKey: number;
   onEdit: (reservation: Reservation) => void;
+  onViewCustomer: (customer: { name: string; phone: string }) => void;
 }
 
 const SLOT_SHORT: Record<Reservation["slot"], string> = {
@@ -160,6 +162,7 @@ export function ReservationList({
   onUnauthorized,
   refreshKey,
   onEdit,
+  onViewCustomer,
 }: ReservationListProps) {
   const [rows, setRows] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -302,7 +305,23 @@ export function ReservationList({
                     )}
                   >
                     <td className="px-4 py-3 text-gray-200 whitespace-nowrap">
-                      {r.customer_name}
+                      <div className="flex items-center gap-2">
+                        <span>{r.customer_name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewCustomer({
+                              name: r.customer_name,
+                              phone: r.customer_phone,
+                            });
+                          }}
+                          className="p-1 rounded text-gray-500 hover:text-[#02BAD6] hover:bg-[#02BAD6]/10 transition-colors"
+                          title="Voir historique de ce client"
+                        >
+                          <History className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
                       {r.customer_phone}

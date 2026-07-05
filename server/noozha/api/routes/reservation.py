@@ -30,10 +30,17 @@ async def list_reservations(
     from_: Annotated[str | None, Query(alias="from")] = None,
     to: str | None = None,
     status_filter: Annotated[str | None, Query(alias="status")] = None,
+    customer_phone: str | None = None,
+    customer_name: str | None = None,
 ) -> ReservationListResponse:
-    """List reservations, optionally filtered by start-date range + status."""
+    """List reservations, optionally filtered by date range, status, or customer."""
     rows = await ReservationController.list_(
-        session, from_iso=from_, to_iso=to, status=status_filter
+        session,
+        from_iso=from_,
+        to_iso=to,
+        status=status_filter,
+        customer_phone=customer_phone,
+        customer_name=customer_name,
     )
     return ReservationListResponse(reservations=rows)  # type: ignore[arg-type]
 
