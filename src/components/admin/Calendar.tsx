@@ -668,6 +668,13 @@ function DetailModal({
               } = ${Number(r.food_price_total).toFixed(2)} €`}
             />
           )}
+          {Number(r.extra_amount) > 0 && (
+            <Row
+              label="Supplément"
+              value={`+${Number(r.extra_amount).toFixed(2)} €${r.extra_reason ? ` (${r.extra_reason})` : ""}`}
+              valueClass="text-sky-400"
+            />
+          )}
           {Number(r.discount_amount) > 0 && (
             <Row
               label="Remise"

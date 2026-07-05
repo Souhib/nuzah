@@ -40,6 +40,8 @@ class ReservationBase(BaseModel):
     food_children: int = Field(default=0, ge=0, le=60)
     discount_amount: Money = Field(default=0)  # type: ignore[assignment]
     discount_reason: str | None = Field(default=None, max_length=500)
+    extra_amount: Money = Field(default=0)  # type: ignore[assignment]
+    extra_reason: str | None = Field(default=None, max_length=500)
     tip_amount: Money = Field(default=0)  # type: ignore[assignment]
     deposit_paid: bool = False
     deposit_method: DepositMethod | None = None
@@ -68,6 +70,8 @@ class ReservationUpdate(BaseModel):
     food_children: int | None = Field(default=None, ge=0, le=60)
     discount_amount: Money | None = None
     discount_reason: str | None = Field(default=None, max_length=500)
+    extra_amount: Money | None = None
+    extra_reason: str | None = Field(default=None, max_length=500)
     tip_amount: Money | None = None
     deposit_paid: bool | None = None
     deposit_method: DepositMethod | None = None
@@ -83,6 +87,7 @@ class PriceBreakdown(BaseModel):
     child_unit_price: Money
     pool_total: Money
     food_total: Money
+    extra: Money
     discount: Money
     tip: Money
     grand_total: Money
@@ -98,6 +103,7 @@ class EstimateRequest(BaseModel):
     food_persons: int | None = Field(default=None, ge=0, le=60)
     food_children: int = Field(default=0, ge=0, le=60)
     discount_amount: Money = Field(default=0)  # type: ignore[assignment]
+    extra_amount: Money = Field(default=0)  # type: ignore[assignment]
     tip_amount: Money = Field(default=0)  # type: ignore[assignment]
 
 
@@ -117,6 +123,8 @@ class ReservationResponse(BaseModel):
     food_price_total: Money
     discount_amount: Money
     discount_reason: str | None
+    extra_amount: Money
+    extra_reason: str | None
     tip_amount: Money
     total_price: Money
     deposit_paid: bool

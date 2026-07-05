@@ -29,6 +29,7 @@ import {
   Loader2,
   Minus,
   Moon,
+  Package,
   Percent,
   Phone,
   Plus,
@@ -347,6 +348,8 @@ export function ReservationForm({
         foodChildren: 0,
         discountAmount: 0,
         discountReason: "",
+        extraAmount: 0,
+        extraReason: "",
         tipAmount: 0,
         depositPaid: false,
         depositMethod: "wero" as DepositMethod,
@@ -370,6 +373,8 @@ export function ReservationForm({
       foodChildren: initial.food_children ?? 0,
       discountAmount: Number(initial.discount_amount),
       discountReason: initial.discount_reason ?? "",
+      extraAmount: Number(initial.extra_amount),
+      extraReason: initial.extra_reason ?? "",
       tipAmount: Number(initial.tip_amount),
       depositPaid: initial.deposit_paid,
       depositMethod: (initial.deposit_method ?? "wero") as DepositMethod,
@@ -392,6 +397,8 @@ export function ReservationForm({
   const [foodChildren, setFoodChildren] = useState(seed.foodChildren);
   const [discountAmount, setDiscountAmount] = useState(seed.discountAmount);
   const [discountReason, setDiscountReason] = useState(seed.discountReason);
+  const [extraAmount, setExtraAmount] = useState(seed.extraAmount);
+  const [extraReason, setExtraReason] = useState(seed.extraReason);
   const [tipAmount, setTipAmount] = useState(seed.tipAmount);
   const [depositPaid, setDepositPaid] = useState(seed.depositPaid);
   const [depositMethod, setDepositMethod] = useState<DepositMethod>(seed.depositMethod);
@@ -425,6 +432,7 @@ export function ReservationForm({
           food_persons: foodFormula ? foodPersons : null,
           food_children: foodFormula ? foodChildren : 0,
           discount_amount: discountAmount,
+          extra_amount: extraAmount,
           tip_amount: tipAmount,
         })
         .then(setBreakdown)
@@ -434,7 +442,7 @@ export function ReservationForm({
         .finally(() => setEstimating(false));
     }, 250);
     return () => clearTimeout(handle);
-  }, [token, slot, adults, children, foodFormula, foodPersons, foodChildren, discountAmount, tipAmount, onUnauthorized]);
+  }, [token, slot, adults, children, foodFormula, foodPersons, foodChildren, discountAmount, extraAmount, tipAmount, onUnauthorized]);
 
   const tierLabel = useMemo<string>(() => {
     if (!breakdown) return "—";
@@ -456,6 +464,8 @@ export function ReservationForm({
     setFoodChildren(0);
     setDiscountAmount(0);
     setDiscountReason("");
+    setExtraAmount(0);
+    setExtraReason("");
     setTipAmount(0);
     setDepositPaid(false);
     setDepositMethod("wero");
@@ -492,6 +502,8 @@ export function ReservationForm({
         food_children: foodFormula ? foodChildren : 0,
         discount_amount: discountAmount,
         discount_reason: discountReason.trim() || null,
+        extra_amount: extraAmount,
+        extra_reason: extraReason.trim() || null,
         tip_amount: tipAmount,
         deposit_paid: depositPaid,
         deposit_method: depositPaid ? depositMethod : null,
@@ -750,6 +762,36 @@ export function ReservationForm({
                 {foodChildren > 0 && ` (dont ${foodChildren} enfant${foodChildren !== 1 ? "s" : ""} à -50%)`}
               </p>
             )}
+          </div>
+        </SectionCard>
+
+        {/* Supplément (agreed at booking, e.g. extra platter au devis) */}
+        <SectionCard icon={Package} title="Supplément au devis (optionnel)">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="block">
+              <span className="text-gray-400 text-sm mb-1.5 block">Montant (€)</span>
+              <div className="relative">
+                <Euro className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={extraAmount}
+                  onChange={(e) => setExtraAmount(Number(e.target.value) || 0)}
+                  className={cn(inputClass, "pl-11")}
+                />
+              </div>
+            </label>
+            <label className="block">
+              <span className="text-gray-400 text-sm mb-1.5 block">Libellé</span>
+              <input
+                type="text"
+                value={extraReason}
+                onChange={(e) => setExtraReason(e.target.value)}
+                className={inputClass}
+                placeholder="Plateau supp. au devis, extra…"
+              />
+            </label>
           </div>
         </SectionCard>
 
@@ -1012,6 +1054,12 @@ export function ReservationForm({
                         </span>
                       </p>
                     </div>
+                  )}
+                  {breakdown.extra > 0 && (
+                    <p className="text-sky-400">
+                      Supplément : +{breakdown.extra.toFixed(2)}€
+                      {extraReason && ` (${extraReason})`}
+                    </p>
                   )}
                   {breakdown.discount > 0 && (
                     <p className="text-amber-400">

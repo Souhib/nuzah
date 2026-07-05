@@ -79,25 +79,30 @@ def compute_total_price(
     food_children: int | None = None,
     discount: Decimal | None = None,
     tip: Decimal | None = None,
+    extra: Decimal | None = None,
 ) -> dict[str, Decimal | Tier]:
     """Aggregate the full price breakdown.
 
     Returns a dict with keys: `tier`, `adult_unit`, `child_unit`, `pool`, `food`,
-    `discount`, `tip`, `total`. All numeric values are quantized to 2 decimals.
-    The tip is folded INTO the total (it's revenue), but kept as a separate
-    line so stats and the UI can show it.
+    `extra`, `discount`, `tip`, `total`. All numeric values are quantized to 2 decimals.
+    Formula: total = pool + food + extra - discount + tip.
     """
     tier, adult_unit, child_unit, pool = compute_pool_price(slot, adults, children)
     food = compute_food_price(food_formula, food_persons, food_children)
     discount_value = max(Decimal("0"), discount or Decimal("0"))
     tip_value = max(Decimal("0"), tip or Decimal("0"))
-    total = max(Decimal("0"), _quantize(pool + food - discount_value + tip_value))
+    extra_value = max(Decimal("0"), extra or Decimal("0"))
+    total = max(
+        Decimal("0"),
+        _quantize(pool + food + extra_value - discount_value + tip_value),
+    )
     return {
         "tier": tier,
         "adult_unit": adult_unit,
         "child_unit": child_unit,
         "pool": pool,
         "food": food,
+        "extra": extra_value,
         "discount": discount_value,
         "tip": tip_value,
         "total": total,

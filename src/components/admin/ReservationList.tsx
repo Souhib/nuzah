@@ -342,6 +342,11 @@ export function ReservationList({
                     </td>
                     <td className="px-4 py-3 text-white font-medium whitespace-nowrap">
                       {Number(r.total_price).toFixed(2)} €
+                      {Number(r.extra_amount) > 0 && (
+                        <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 text-[10px] font-semibold tabular-nums">
+                          +{Number(r.extra_amount).toFixed(0)}
+                        </span>
+                      )}
                       {Number(r.discount_amount) > 0 && (
                         <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[10px] font-semibold tabular-nums">
                           −{Number(r.discount_amount).toFixed(0)}

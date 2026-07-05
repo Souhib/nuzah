@@ -45,6 +45,8 @@ export interface Reservation {
   food_price_total: number;
   discount_amount: number;
   discount_reason: string | null;
+  extra_amount: number;
+  extra_reason: string | null;
   tip_amount: number;
   total_price: number;
   deposit_paid: boolean;
@@ -61,6 +63,7 @@ export interface PriceBreakdown {
   child_unit_price: number;
   pool_total: number;
   food_total: number;
+  extra: number;
   discount: number;
   tip: number;
   grand_total: number;
@@ -92,6 +95,8 @@ export interface ReservationCreate {
   food_children?: number;
   discount_amount?: number;
   discount_reason?: string | null;
+  extra_amount?: number;
+  extra_reason?: string | null;
   tip_amount?: number;
   deposit_paid?: boolean;
   deposit_method?: DepositMethod | null;
@@ -109,6 +114,7 @@ export interface EstimateRequest {
   food_persons?: number | null;
   food_children?: number;
   discount_amount?: number;
+  extra_amount?: number;
   tip_amount?: number;
 }
 

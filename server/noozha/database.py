@@ -107,3 +107,18 @@ async def _apply_pre_alembic_migrations(engine: AsyncEngine) -> None:
                 "ADD COLUMN IF NOT EXISTS tip_amount NUMERIC(10, 2) NOT NULL DEFAULT 0"
             )
         )
+        # 2026-07-05: optional "supplément" (add-on at booking time, quoted at
+        # the devis — e.g. an extra platter). Semantically distinct from a tip
+        # (post-visit gift) — it's agreed at booking so has a short label to
+        # remember what was billed for.
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations "
+                "ADD COLUMN IF NOT EXISTS extra_amount NUMERIC(10, 2) NOT NULL DEFAULT 0"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations ADD COLUMN IF NOT EXISTS extra_reason VARCHAR"
+            )
+        )
