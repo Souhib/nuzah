@@ -148,7 +148,7 @@ class ReservationController:
         return reservation
 
     @classmethod
-    async def update(
+    async def update(  # noqa: PLR0915 — legitimately many partial-update branches
         cls,
         session: AsyncSession,
         reservation_id: UUID,
@@ -251,6 +251,12 @@ class ReservationController:
         reservation.total_price = breakdown["total"]  # type: ignore[assignment]
         if payload.deposit_paid is not None:
             reservation.deposit_paid = payload.deposit_paid
+            # Auto-clear the method when unpaying: the front sends
+            # deposit_method=null in that case but our partial-update
+            # semantics treat null as "no change" — without this the old
+            # method would linger.
+            if not payload.deposit_paid:
+                reservation.deposit_method = None
         if payload.deposit_method is not None:
             reservation.deposit_method = payload.deposit_method  # type: ignore[assignment]
         if payload.status is not None:

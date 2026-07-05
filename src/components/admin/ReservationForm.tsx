@@ -486,7 +486,7 @@ export function ReservationForm({
       const endOverride = endTime !== defaults.end;
       const crossesMidnight = slot === "night";
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         slot,
         date,
         ...(startOverride ? { start_at: toParisIso(date, startTime) } : {}),
@@ -510,6 +510,15 @@ export function ReservationForm({
         status,
         notes: notes.trim() || null,
       };
+
+      // In edit mode, when the current form has no food formula, tell the
+      // backend to explicitly reset food fields. Without this flag, the
+      // backend's partial-update semantics (null = "no change") would keep
+      // the previous food formula in place. `clear_food` is edit-only —
+      // sending it on create would fail schema validation (extra="forbid").
+      if (isEdit && !foodFormula) {
+        payload.clear_food = true;
+      }
 
       if (isEdit && initial) {
         await api.reservations.update(token, initial.id, payload);
