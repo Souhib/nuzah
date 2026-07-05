@@ -227,16 +227,30 @@ export function Calendar({
     [month, today],
   );
 
+  // Stats scope: in week mode the fetched range IS the week, so all rows count.
+  // In month mode the range is 42 days (grid) which SPILLS into adjacent months
+  // — filter to the displayed month to avoid double-counting neighbouring resas.
+  const statsScope = useMemo(() => {
+    if (viewMode === "week") return reservations;
+    return reservations.filter((r) => {
+      const d = new Date(r.start_at);
+      return (
+        d.getFullYear() === month.getFullYear() &&
+        d.getMonth() === month.getMonth()
+      );
+    });
+  }, [viewMode, month, reservations]);
+
   const weekStats = useMemo(() => {
-    const confirmed = reservations.filter((r) => r.status === "confirmed");
-    const pending = reservations.filter((r) => r.status === "pending");
+    const confirmed = statsScope.filter((r) => r.status === "confirmed");
+    const pending = statsScope.filter((r) => r.status === "pending");
     return {
       revenue: confirmed.reduce((s, r) => s + Number(r.total_price), 0),
       tips: confirmed.reduce((s, r) => s + Number(r.tip_amount), 0),
       confirmedCount: confirmed.length,
       pendingCount: pending.length,
     };
-  }, [reservations]);
+  }, [statsScope]);
 
   // Touch swipe handling — basic, no library.
   const touchStartX = useRef<number | null>(null);
@@ -337,7 +351,7 @@ export function Calendar({
           </div>
         )}
 
-        {!loading && reservations.length > 0 && (
+        {!loading && statsScope.length > 0 && (
           <div
             className={cn(
               "mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-2 gap-3",
@@ -383,16 +397,26 @@ export function Calendar({
 
       {/* --- MONTH view --- */}
       {viewMode === "month" && (
-        <MonthGrid
-          monthStart={month}
-          reservations={reservations}
-          today={today}
-          loading={loading}
-          onDayClick={(date) => {
-            setViewMode("week");
-            setMonday(startOfWeek(date));
-          }}
-        />
+        <>
+          <MonthGrid
+            monthStart={month}
+            reservations={reservations}
+            today={today}
+            loading={loading}
+            onDayClick={(date) => {
+              setViewMode("week");
+              setMonday(startOfWeek(date));
+            }}
+          />
+          {!loading && (
+            <MonthDayList
+              monthStart={month}
+              reservations={statsScope}
+              onSelect={(r) => setSelected(r)}
+              today={today}
+            />
+          )}
+        </>
       )}
 
       {/* --- WEEK view --- */}
@@ -442,7 +466,7 @@ export function Calendar({
                       </p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <TimeStrip reservations={bucket.all} dayStart={bucket.date} />
+                      <HourChips reservations={bucket.all} />
                     </div>
                     {hasReservations && (
                       <span className="text-xs text-gray-500 shrink-0 tabular-nums">
@@ -860,66 +884,171 @@ const STAT_COLORS = {
   amber: { text: "text-amber-400", bg: "bg-amber-500/10" },
 } as const;
 
-// Time strip covers 10h → 26h (i.e. 02h next day) = 16 hours.
-// Any reservation outside is clamped/hidden.
-const STRIP_START_HOURS = 10;
-const STRIP_RANGE_HOURS = 16;
-
-function TimeStrip({
-  reservations,
-  dayStart,
-}: {
-  reservations: Reservation[];
-  dayStart: Date;
-}) {
-  const startOfDayMs = new Date(
-    dayStart.getFullYear(),
-    dayStart.getMonth(),
-    dayStart.getDate(),
-    0,
-    0,
-    0,
-    0,
-  ).getTime();
-  const stripStartMs = startOfDayMs + STRIP_START_HOURS * 3_600_000;
-  const stripRangeMs = STRIP_RANGE_HOURS * 3_600_000;
-
-  const blocks = reservations
+/**
+ * Compact "dot + start hour" chips per reservation, colored by status.
+ * Cancelled reservations are hidden. Sorted chronologically.
+ * Answers "at a glance, what's booked today and when?" without misleading
+ * (like the fixed 4 slot dots did when hours were customised).
+ */
+function HourChips({ reservations }: { reservations: Reservation[] }) {
+  const chips = reservations
     .filter((r) => r.status !== "cancelled")
-    .map((r) => {
-      const startMs = new Date(r.start_at).getTime();
-      const endMs = new Date(r.end_at).getTime();
-      const clampedStart = Math.max(stripStartMs, startMs);
-      const clampedEnd = Math.min(stripStartMs + stripRangeMs, endMs);
-      if (clampedEnd <= clampedStart) return null;
-      const left = ((clampedStart - stripStartMs) / stripRangeMs) * 100;
-      const width = ((clampedEnd - clampedStart) / stripRangeMs) * 100;
-      return { id: r.id, left, width, status: r.status };
-    })
-    .filter(Boolean) as { id: string; left: number; width: number; status: Status }[];
+    .sort((a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime());
+
+  if (chips.length === 0) {
+    return <span className="text-xs text-gray-600">—</span>;
+  }
 
   return (
-    <div>
-      <div className="relative h-2 bg-gray-800/60 rounded-full overflow-hidden">
-        {blocks.map((b) => (
+    <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
+      {chips.map((r) => {
+        const d = new Date(r.start_at);
+        const h = String(d.getHours()).padStart(2, "0");
+        return (
+          <span
+            key={r.id}
+            className="inline-flex items-center gap-1 whitespace-nowrap"
+          >
+            <span
+              className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                STATUS_COLORS[r.status].dot,
+              )}
+            />
+            <span className="text-[11px] text-gray-400 tabular-nums leading-none">
+              {h}h
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function MonthDayList({
+  monthStart,
+  reservations,
+  onSelect,
+  today,
+}: {
+  monthStart: Date;
+  reservations: Reservation[];
+  onSelect: (r: Reservation) => void;
+  today: Date;
+}) {
+  // Group by day, keep only days that have at least one non-cancelled resa.
+  const byDay = useMemo(() => {
+    const m = new Map<string, { date: Date; rows: Reservation[] }>();
+    for (const r of reservations) {
+      if (r.status === "cancelled") continue;
+      const d = new Date(r.start_at);
+      if (
+        d.getFullYear() !== monthStart.getFullYear() ||
+        d.getMonth() !== monthStart.getMonth()
+      ) {
+        continue;
+      }
+      const dayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const key = dayDate.toISOString();
+      const bucket = m.get(key) ?? { date: dayDate, rows: [] };
+      bucket.rows.push(r);
+      m.set(key, bucket);
+    }
+    return Array.from(m.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+  }, [reservations, monthStart]);
+
+  if (byDay.length === 0) {
+    return (
+      <div className="mt-4 text-center text-sm text-gray-500 py-6">
+        Aucune réservation ce mois-ci.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 space-y-2.5">
+      <p className="px-1 text-[11px] uppercase tracking-wider text-gray-500 font-medium">
+        Détail des jours réservés
+      </p>
+      {byDay.map(({ date, rows }) => {
+        const isToday = isSameDay(date, today);
+        const dayNumIndex = ((date.getDay() || 7) - 1) as
+          | 0
+          | 1
+          | 2
+          | 3
+          | 4
+          | 5
+          | 6;
+        rows.sort(
+          (a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime(),
+        );
+        return (
           <div
-            key={b.id}
+            key={date.toISOString()}
             className={cn(
-              "absolute inset-y-0 rounded-full",
-              b.status === "confirmed" && "bg-emerald-400",
-              b.status === "pending" && "bg-amber-400",
+              "rounded-2xl border overflow-hidden",
+              isToday
+                ? "bg-[#02BAD6]/[0.04] border-[#02BAD6]/30"
+                : "bg-gray-900/40 border-white/[0.06]",
             )}
-            style={{ left: `${b.left}%`, width: `${b.width}%` }}
-          />
-        ))}
-      </div>
-      <div className="mt-1 flex justify-between text-[9px] text-gray-500 tabular-nums leading-none px-0.5">
-        <span>10h</span>
-        <span>14h</span>
-        <span>18h</span>
-        <span>22h</span>
-        <span>02h</span>
-      </div>
+          >
+            <div className="px-4 py-3 flex items-center gap-3">
+              <div
+                className={cn(
+                  "shrink-0 w-12 text-center",
+                  isToday ? "text-[#02BAD6]" : "text-gray-300",
+                )}
+              >
+                <p className="text-[10px] uppercase tracking-wider font-medium opacity-80">
+                  {DAY_NAMES[dayNumIndex]}
+                </p>
+                <p className="font-bold text-xl leading-tight">{date.getDate()}</p>
+              </div>
+              <div className="flex-1 min-w-0">
+                <HourChips reservations={rows} />
+              </div>
+              <span className="text-xs text-gray-500 shrink-0 tabular-nums">
+                {rows.length}
+              </span>
+            </div>
+            <div className="border-t border-white/[0.04] divide-y divide-white/[0.04]">
+              {rows.map((r) => {
+                const SlotIcon = SLOT_ICONS[r.slot];
+                const c = STATUS_COLORS[r.status];
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => onSelect(r)}
+                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left"
+                  >
+                    <SlotIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-gray-500 font-mono">
+                          {formatTime(r.start_at)}–{formatTime(r.end_at)}
+                        </span>
+                        <span className={cn("inline-block w-1 h-1 rounded-full", c.dot)} />
+                        <span className="text-sm text-gray-200 truncate">
+                          {r.customer_name}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""} ·{" "}
+                        {Number(r.total_price).toFixed(0)}€
+                        {r.food_formula && " · repas"}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
