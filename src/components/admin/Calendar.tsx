@@ -37,7 +37,6 @@ interface CalendarProps {
   onEdit: (reservation: Reservation) => void;
 }
 
-const SLOT_ORDER: Slot[] = ["morning", "afternoon", "evening", "night"];
 const SLOT_ICONS: Record<Slot, typeof Sun> = {
   morning: Sun,
   afternoon: Sunset,
@@ -347,36 +346,13 @@ export function Calendar({ token, onUnauthorized, refreshKey, onEdit }: Calendar
                       </p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      {/* Dots — 4 slots */}
-                      <div className="flex items-center gap-1.5">
-                        {SLOT_ORDER.map((s) => {
-                          const list = bucket.bySlot[s] ?? [];
-                          const has = list.length > 0;
-                          const dominantStatus =
-                            list.find((r) => r.status === "confirmed")?.status ??
-                            list[0]?.status;
-                          return (
-                            <span
-                              key={s}
-                              title={SLOT_LABELS[s].name}
-                              className={cn(
-                                "w-2 h-2 rounded-full",
-                                has
-                                  ? dominantStatus
-                                    ? STATUS_COLORS[dominantStatus].dot
-                                    : "bg-gray-500"
-                                  : "bg-white/[0.06]",
-                              )}
-                            />
-                          );
-                        })}
-                        <span className="text-xs text-gray-500 ml-1">
-                          {hasReservations
-                            ? `${bucket.all.length} résa${bucket.all.length > 1 ? "s" : ""}`
-                            : ""}
-                        </span>
-                      </div>
+                      <TimeStrip reservations={bucket.all} dayStart={bucket.date} />
                     </div>
+                    {hasReservations && (
+                      <span className="text-xs text-gray-500 shrink-0 tabular-nums">
+                        {bucket.all.length}
+                      </span>
+                    )}
                   </div>
 
                   {/* Reservations under this day */}
@@ -761,6 +737,70 @@ const STAT_COLORS = {
   emerald: { text: "text-emerald-400", bg: "bg-emerald-500/10" },
   amber: { text: "text-amber-400", bg: "bg-amber-500/10" },
 } as const;
+
+// Time strip covers 10h → 26h (i.e. 02h next day) = 16 hours.
+// Any reservation outside is clamped/hidden.
+const STRIP_START_HOURS = 10;
+const STRIP_RANGE_HOURS = 16;
+
+function TimeStrip({
+  reservations,
+  dayStart,
+}: {
+  reservations: Reservation[];
+  dayStart: Date;
+}) {
+  const startOfDayMs = new Date(
+    dayStart.getFullYear(),
+    dayStart.getMonth(),
+    dayStart.getDate(),
+    0,
+    0,
+    0,
+    0,
+  ).getTime();
+  const stripStartMs = startOfDayMs + STRIP_START_HOURS * 3_600_000;
+  const stripRangeMs = STRIP_RANGE_HOURS * 3_600_000;
+
+  const blocks = reservations
+    .filter((r) => r.status !== "cancelled")
+    .map((r) => {
+      const startMs = new Date(r.start_at).getTime();
+      const endMs = new Date(r.end_at).getTime();
+      const clampedStart = Math.max(stripStartMs, startMs);
+      const clampedEnd = Math.min(stripStartMs + stripRangeMs, endMs);
+      if (clampedEnd <= clampedStart) return null;
+      const left = ((clampedStart - stripStartMs) / stripRangeMs) * 100;
+      const width = ((clampedEnd - clampedStart) / stripRangeMs) * 100;
+      return { id: r.id, left, width, status: r.status };
+    })
+    .filter(Boolean) as { id: string; left: number; width: number; status: Status }[];
+
+  return (
+    <div>
+      <div className="relative h-2 bg-gray-800/60 rounded-full overflow-hidden">
+        {blocks.map((b) => (
+          <div
+            key={b.id}
+            className={cn(
+              "absolute inset-y-0 rounded-full",
+              b.status === "confirmed" && "bg-emerald-400",
+              b.status === "pending" && "bg-amber-400",
+            )}
+            style={{ left: `${b.left}%`, width: `${b.width}%` }}
+          />
+        ))}
+      </div>
+      <div className="mt-1 flex justify-between text-[9px] text-gray-500 tabular-nums leading-none px-0.5">
+        <span>10h</span>
+        <span>14h</span>
+        <span>18h</span>
+        <span>22h</span>
+        <span>02h</span>
+      </div>
+    </div>
+  );
+}
 
 function StatTile({
   icon: Icon,
