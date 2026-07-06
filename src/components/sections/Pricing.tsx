@@ -435,6 +435,7 @@ export function Pricing({ isNight }: PricingProps) {
                 name: string;
                 description: string;
                 price: string;
+                unit?: string;
               }[]
             ).map((item) => (
               <div
@@ -477,7 +478,7 @@ export function Pricing({ isNight }: PricingProps) {
                       isNight ? "text-gray-500" : "text-gray-400"
                     )}
                   >
-                    {t("food.perPerson")}
+                    {item.unit ?? t("food.perPerson")}
                   </span>
                 </div>
               </div>

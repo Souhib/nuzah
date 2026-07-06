@@ -73,13 +73,15 @@
     "items": [
       {
         "name": "Plateaux à partager",
-        "description": "Plateaux salés selon l'inspiration du chef ou sur demande (mini-burgers, fricassés, bricks…) + thé à la menthe — à partager au bord de la piscine",
-        "price": "14"
+        "description": "Un plateau d'environ 40 pièces salées selon l'inspiration du chef ou sur demande (mini-burgers, fricassés, bricks…) + thé à la menthe — à partager au bord de la piscine",
+        "price": "30",
+        "unit": "/plateau"
       },
       {
         "name": "Menu traditionnel",
         "description": "Entrée + plat principal selon l'inspiration du chef ou sur demande (couscous, tajine, pizzas…) + thé à la menthe",
-        "price": "19"
+        "price": "19",
+        "unit": "/personne"
       }
     ]
   },

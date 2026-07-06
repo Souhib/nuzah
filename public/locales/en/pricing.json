@@ -72,14 +72,16 @@
     "perPerson": "/person",
     "items": [
       {
-        "name": "Sharing platters",
-        "description": "Savoury platters by chef's inspiration or on request (mini-burgers, fricassés, bricks…) + mint tea — to share by the pool",
-        "price": "14"
+        "name": "Sharing platter",
+        "description": "One platter of around 40 savoury pieces by chef's inspiration or on request (mini-burgers, fricassés, bricks…) + mint tea — to share by the pool",
+        "price": "30",
+        "unit": "/platter"
       },
       {
         "name": "Traditional menu",
         "description": "Starter + main course by chef's inspiration or on request (couscous, tajine, pizzas…) + mint tea",
-        "price": "19"
+        "price": "19",
+        "unit": "/person"
       }
     ]
   },
