@@ -14,6 +14,7 @@ from noozha.api.constants import (
     ADULT_PRICE_GRID,
     CHILD_PRICE_RATIO,
     FOOD_PRICE_PER_PERSON,
+    FOOD_PRICE_PER_PLATTER,
     PARIS_TZ_NAME,
     SLOT_DEFAULT_HOURS,
     TIER_MEDIUM_MAX,
@@ -22,7 +23,7 @@ from noozha.api.constants import (
 
 Slot = Literal["morning", "afternoon", "evening", "night"]
 Tier = Literal["small", "medium", "large"]
-FoodFormula = Literal["platters_14", "menu_19"]
+FoodFormula = Literal["platters_14", "platters_30", "menu_19"]
 
 
 def _quantize(value: Decimal) -> Decimal:
@@ -54,14 +55,23 @@ def compute_food_price(
     formula: FoodFormula | None,
     persons: int | None,
     children: int | None = 0,
+    platters: int | None = 0,
 ) -> Decimal:
     """Return total food cost (€) for the given formula.
 
-    `persons` is the TOTAL number of people who eat. `children` is the subset
-    that pays the child rate (50% of the adult rate, mirroring the pool grid).
-    Returns `Decimal("0")` if no formula picked or no eaters.
+    Per-platter formulas (`platters_30`): price = unit * `platters`. `persons`
+    and `children` are ignored.
+
+    Per-person formulas (`platters_14` legacy, `menu_19`): `persons` is the
+    total people who eat and `children` the subset paying the child rate
+    (50% of the adult rate). Returns `Decimal("0")` if no formula or no count.
     """
-    if not formula or not persons or persons <= 0:
+    if not formula:
+        return Decimal("0")
+    if formula in FOOD_PRICE_PER_PLATTER:
+        count = max(0, platters or 0)
+        return _quantize(FOOD_PRICE_PER_PLATTER[formula] * count)
+    if not persons or persons <= 0:
         return Decimal("0")
     children = max(0, min(children or 0, persons))
     adults = persons - children
@@ -77,6 +87,7 @@ def compute_total_price(
     food_formula: FoodFormula | None = None,
     food_persons: int | None = None,
     food_children: int | None = None,
+    food_platters: int | None = None,
     discount: Decimal | None = None,
     tip: Decimal | None = None,
     extra: Decimal | None = None,
@@ -88,7 +99,7 @@ def compute_total_price(
     Formula: total = pool + food + extra - discount + tip.
     """
     tier, adult_unit, child_unit, pool = compute_pool_price(slot, adults, children)
-    food = compute_food_price(food_formula, food_persons, food_children)
+    food = compute_food_price(food_formula, food_persons, food_children, food_platters)
     discount_value = max(Decimal("0"), discount or Decimal("0"))
     tip_value = max(Decimal("0"), tip or Decimal("0"))
     extra_value = max(Decimal("0"), extra or Decimal("0"))

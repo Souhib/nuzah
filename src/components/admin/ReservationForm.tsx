@@ -348,6 +348,7 @@ export function ReservationForm({
         foodFormula: "" as FoodFormula | "",
         foodPersons: 0,
         foodChildren: 0,
+        foodPlatters: 0,
         discountAmount: 0,
         discountReason: "",
         extraAmount: 0,
@@ -373,6 +374,7 @@ export function ReservationForm({
       foodFormula: (initial.food_formula ?? "") as FoodFormula | "",
       foodPersons: initial.food_persons ?? 0,
       foodChildren: initial.food_children ?? 0,
+      foodPlatters: initial.food_platters ?? 0,
       discountAmount: Number(initial.discount_amount),
       discountReason: initial.discount_reason ?? "",
       extraAmount: Number(initial.extra_amount),
@@ -397,6 +399,11 @@ export function ReservationForm({
   const [foodFormula, setFoodFormula] = useState<FoodFormula | "">(seed.foodFormula);
   const [foodPersons, setFoodPersons] = useState(seed.foodPersons);
   const [foodChildren, setFoodChildren] = useState(seed.foodChildren);
+  const [foodPlatters, setFoodPlatters] = useState(seed.foodPlatters);
+  // The legacy per-person platters formula (platters_14) only exists on old
+  // reservations. We surface it as a 4th chip during edit so the admin can
+  // recognise it and, if desired, migrate to the new per-platter formula.
+  const legacyPlatterEdit = seed.foodFormula === "platters_14";
   const [discountAmount, setDiscountAmount] = useState(seed.discountAmount);
   const [discountReason, setDiscountReason] = useState(seed.discountReason);
   const [extraAmount, setExtraAmount] = useState(seed.extraAmount);
@@ -425,14 +432,16 @@ export function ReservationForm({
     }
     const handle = setTimeout(() => {
       setEstimating(true);
+      const isPlatter30 = foodFormula === "platters_30";
       api.reservations
         .estimate(token, {
           slot,
           adults,
           children,
           food_formula: foodFormula || null,
-          food_persons: foodFormula ? foodPersons : null,
-          food_children: foodFormula ? foodChildren : 0,
+          food_persons: foodFormula && !isPlatter30 ? foodPersons : null,
+          food_children: foodFormula && !isPlatter30 ? foodChildren : 0,
+          food_platters: isPlatter30 ? foodPlatters : 0,
           discount_amount: discountAmount,
           extra_amount: extraAmount,
           tip_amount: tipAmount,
@@ -444,7 +453,7 @@ export function ReservationForm({
         .finally(() => setEstimating(false));
     }, 250);
     return () => clearTimeout(handle);
-  }, [token, slot, adults, children, foodFormula, foodPersons, foodChildren, discountAmount, extraAmount, tipAmount, onUnauthorized]);
+  }, [token, slot, adults, children, foodFormula, foodPersons, foodChildren, foodPlatters, discountAmount, extraAmount, tipAmount, onUnauthorized]);
 
   const tierLabel = useMemo<string>(() => {
     if (!breakdown) return "—";
@@ -464,6 +473,7 @@ export function ReservationForm({
     setFoodFormula("");
     setFoodPersons(0);
     setFoodChildren(0);
+    setFoodPlatters(0);
     setDiscountAmount(0);
     setDiscountReason("");
     setExtraAmount(0);
@@ -488,6 +498,7 @@ export function ReservationForm({
       const endOverride = endTime !== defaults.end;
       const crossesMidnight = slot === "night";
 
+      const isPlatter30 = foodFormula === "platters_30";
       const payload: Record<string, unknown> = {
         slot,
         date,
@@ -500,8 +511,9 @@ export function ReservationForm({
         adults,
         children,
         food_formula: foodFormula || null,
-        food_persons: foodFormula ? foodPersons : null,
-        food_children: foodFormula ? foodChildren : 0,
+        food_persons: foodFormula && !isPlatter30 ? foodPersons : null,
+        food_children: foodFormula && !isPlatter30 ? foodChildren : 0,
+        food_platters: isPlatter30 ? foodPlatters : 0,
         discount_amount: discountAmount,
         discount_reason: discountReason.trim() || null,
         extra_amount: extraAmount,
@@ -700,15 +712,55 @@ export function ReservationForm({
         {/* Repas (optionnel) */}
         <SectionCard icon={ChefHat} title="Repas (optionnel)">
           <div className="space-y-4">
+            {legacyPlatterEdit && foodFormula === "platters_14" && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Ancienne formule (14€/pers)</p>
+                  <p className="text-amber-300/70 mt-0.5">
+                    Cette réservation a été prise avant le passage au nouveau tarif.
+                    Choisissez « Plateaux à partager » ci-dessous pour appliquer le
+                    nouveau tarif 30€/plateau, ou laissez tel quel pour conserver le prix d'origine.
+                  </p>
+                </div>
+              </div>
+            )}
             <div>
               <span className="text-gray-400 text-sm mb-2 block">Formule</span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {([
-                  { v: "", label: "Aucun", price: "" },
-                  { v: "platters_14", label: "Plateaux à partager", price: "14€/pers" },
-                  { v: "menu_19", label: "Menu traditionnel", price: "19€/pers" },
-                ] as { v: FoodFormula | ""; label: string; price: string }[]).map((opt) => {
+              <div
+                className={cn(
+                  "grid gap-2",
+                  legacyPlatterEdit
+                    ? "grid-cols-1 sm:grid-cols-4"
+                    : "grid-cols-1 sm:grid-cols-3",
+                )}
+              >
+                {(
+                  [
+                    { v: "", label: "Aucun", price: "" },
+                    {
+                      v: "platters_30",
+                      label: "Plateaux à partager",
+                      price: "30€/plateau (~40 pièces)",
+                    },
+                    {
+                      v: "menu_19",
+                      label: "Menu traditionnel",
+                      price: "19€/pers",
+                    },
+                    ...(legacyPlatterEdit
+                      ? [
+                          {
+                            v: "platters_14" as const,
+                            label: "Ancienne formule",
+                            price: "14€/pers (héritée)",
+                          },
+                        ]
+                      : []),
+                  ] as { v: FoodFormula | ""; label: string; price: string }[]
+                ).map((opt) => {
                   const active = foodFormula === opt.v;
+                  const isLegacy = opt.v === "platters_14";
                   return (
                     <button
                       key={opt.v || "none"}
@@ -718,28 +770,71 @@ export function ReservationForm({
                         if (!opt.v) {
                           setFoodPersons(0);
                           setFoodChildren(0);
+                          setFoodPlatters(0);
                           setDepositPaid(false);
-                        } else if (foodPersons === 0) {
-                          setFoodPersons(adults + children);
-                          setFoodChildren(children);
+                        } else if (opt.v === "platters_30") {
+                          // Nouveau plateau : reset les compteurs "pers" et
+                          // proposer 1 plateau par défaut (min raisonnable).
+                          setFoodPersons(0);
+                          setFoodChildren(0);
+                          if (foodPlatters === 0) setFoodPlatters(1);
+                        } else {
+                          // Menu (ou legacy platters_14) : passer sur pers/enfants
+                          setFoodPlatters(0);
+                          if (foodPersons === 0) {
+                            setFoodPersons(adults + children);
+                            setFoodChildren(children);
+                          }
                         }
                       }}
                       className={cn(
                         "p-3 rounded-xl border transition-all duration-200 text-left",
                         active
-                          ? "bg-[#02BAD6]/10 border-[#02BAD6] text-[#02BAD6]"
-                          : "bg-gray-800/30 border-white/[0.08] text-gray-300 hover:border-white/[0.15]",
+                          ? isLegacy
+                            ? "bg-amber-500/10 border-amber-500/40 text-amber-300"
+                            : "bg-[#02BAD6]/10 border-[#02BAD6] text-[#02BAD6]"
+                          : isLegacy
+                            ? "bg-amber-500/[0.04] border-amber-500/20 text-amber-300/60 hover:border-amber-500/40"
+                            : "bg-gray-800/30 border-white/[0.08] text-gray-300 hover:border-white/[0.15]",
                       )}
                     >
                       <p className="text-sm font-semibold">{opt.label}</p>
-                      {opt.price && <p className="text-xs text-gray-500">{opt.price}</p>}
+                      {opt.price && <p className="text-xs opacity-70">{opt.price}</p>}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {foodFormula && (
+            {foodFormula === "platters_30" && (
+              <div className="space-y-2 pt-2">
+                <div className="max-w-xs">
+                  <Stepper
+                    label="Nombre de plateaux"
+                    icon={Package}
+                    value={foodPlatters}
+                    onChange={setFoodPlatters}
+                    min={1}
+                    max={20}
+                  />
+                </div>
+                {(() => {
+                  const totalPieces = foodPlatters * 40;
+                  const totalGuests = adults + children;
+                  const perGuest = totalGuests > 0
+                    ? Math.round(totalPieces / totalGuests)
+                    : 0;
+                  return (
+                    <p className="text-xs text-gray-500">
+                      ≈ {totalPieces} pièces au total
+                      {totalGuests > 0 && ` · ~${perGuest} pièces/pers pour ${totalGuests} pers`}
+                    </p>
+                  );
+                })()}
+              </div>
+            )}
+
+            {(foodFormula === "menu_19" || foodFormula === "platters_14") && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <Stepper
                   label="Adultes au repas"
@@ -767,7 +862,7 @@ export function ReservationForm({
                 />
               </div>
             )}
-            {foodFormula && (
+            {(foodFormula === "menu_19" || foodFormula === "platters_14") && (
               <p className="text-xs text-gray-500">
                 Total au repas : {foodPersons} personne{foodPersons !== 1 ? "s" : ""}
                 {foodChildren > 0 && ` (dont ${foodChildren} enfant${foodChildren !== 1 ? "s" : ""} à -50%)`}
@@ -1047,23 +1142,34 @@ export function ReservationForm({
                   )}
                   {breakdown.food_total > 0 && foodFormula && (
                     <div className="space-y-0.5">
-                      <p>
-                        Repas {FOOD_LABELS[foodFormula].name} ({FOOD_LABELS[foodFormula].unit}€/pers) :
-                      </p>
-                      <p className="pl-3">
-                        {Math.max(0, foodPersons - foodChildren)} ad ×{" "}
-                        {FOOD_LABELS[foodFormula].unit}€
-                        {foodChildren > 0 && (
-                          <>
-                            {" + "}
-                            {foodChildren} enf × {(FOOD_LABELS[foodFormula].unit / 2).toFixed(2)}€
-                          </>
-                        )}
-                        {" = "}
-                        <span className="text-gray-300">
-                          {breakdown.food_total.toFixed(2)}€
-                        </span>
-                      </p>
+                      {FOOD_LABELS[foodFormula].per === "platter" ? (
+                        <p>
+                          Repas {FOOD_LABELS[foodFormula].name} :{" "}
+                          <span className="text-gray-300">
+                            {foodPlatters} plateau{foodPlatters !== 1 ? "x" : ""} × {FOOD_LABELS[foodFormula].unit}€ = {breakdown.food_total.toFixed(2)}€
+                          </span>
+                        </p>
+                      ) : (
+                        <>
+                          <p>
+                            Repas {FOOD_LABELS[foodFormula].name} ({FOOD_LABELS[foodFormula].unit}€/pers) :
+                          </p>
+                          <p className="pl-3">
+                            {Math.max(0, foodPersons - foodChildren)} ad ×{" "}
+                            {FOOD_LABELS[foodFormula].unit}€
+                            {foodChildren > 0 && (
+                              <>
+                                {" + "}
+                                {foodChildren} enf × {(FOOD_LABELS[foodFormula].unit / 2).toFixed(2)}€
+                              </>
+                            )}
+                            {" = "}
+                            <span className="text-gray-300">
+                              {breakdown.food_total.toFixed(2)}€
+                            </span>
+                          </p>
+                        </>
+                      )}
                     </div>
                   )}
                   {breakdown.extra > 0 && (

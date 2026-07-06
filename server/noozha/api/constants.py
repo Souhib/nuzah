@@ -36,10 +36,16 @@ TIER_SMALL_MAX = 6
 TIER_MEDIUM_MAX = 10
 TIER_LARGE_MAX = 15
 
-# Food formulas (€/pers).
+# Food formulas priced per person (€/pers). Legacy platter formula kept for
+# historical reservations already booked at that rate.
 FOOD_PRICE_PER_PERSON: dict[str, Decimal] = {
     "platters_14": Decimal("14"),
     "menu_19": Decimal("19"),
+}
+
+# Food formulas priced per platter (€/plateau) — one platter ≈ 40 pieces.
+FOOD_PRICE_PER_PLATTER: dict[str, Decimal] = {
+    "platters_30": Decimal("30"),
 }
 
 # Default slot hours (Europe/Paris wall clock).

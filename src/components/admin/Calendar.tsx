@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ApiError,
+  formatFoodSummary,
   type Reservation,
   type Slot,
   SLOT_LABELS,
@@ -687,7 +688,7 @@ function DetailModal({
           {r.food_formula && (
             <Row
               label="Repas"
-              value={`${r.food_formula === "platters_14" ? "Plateaux" : "Menu"} × ${r.food_persons}${
+              value={`${formatFoodSummary(r)}${
                 r.food_children > 0 ? ` (dont ${r.food_children} enf. -50%)` : ""
               } = ${Number(r.food_price_total).toFixed(2)} €`}
             />

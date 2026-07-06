@@ -122,3 +122,20 @@ async def _apply_pre_alembic_migrations(engine: AsyncEngine) -> None:
                 "ALTER TABLE reservations ADD COLUMN IF NOT EXISTS extra_reason VARCHAR"
             )
         )
+        # 2026-07-06: per-platter platters formula (30€/plateau, ~40 pieces).
+        # New column stores the platter count; old per-person `platters_14`
+        # rows keep `food_platters = 0` and are priced from `food_persons`.
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations "
+                "ADD COLUMN IF NOT EXISTS food_platters INTEGER NOT NULL DEFAULT 0"
+            )
+        )
+        # Add the new enum value. PG12+ allows this inside a transaction as
+        # long as the new value isn't USED in the same transaction — safe here
+        # because the migration runs at startup before any insert path.
+        await conn.execute(
+            text(
+                "ALTER TYPE food_formula ADD VALUE IF NOT EXISTS 'platters_30'"
+            )
+        )

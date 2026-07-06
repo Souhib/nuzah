@@ -114,6 +114,7 @@ class ReservationController:
             food_formula=payload.food_formula,
             food_persons=payload.food_persons,
             food_children=food_children,
+            food_platters=payload.food_platters,
             discount=payload.discount_amount,
             tip=payload.tip_amount,
             extra=payload.extra_amount,
@@ -130,6 +131,7 @@ class ReservationController:
             food_formula=payload.food_formula,  # type: ignore[arg-type]
             food_persons=payload.food_persons,
             food_children=food_children,
+            food_platters=payload.food_platters,
             food_price_total=breakdown["food"],  # type: ignore[arg-type]
             discount_amount=breakdown["discount"],  # type: ignore[arg-type]
             discount_reason=payload.discount_reason,
@@ -196,6 +198,15 @@ class ReservationController:
         )
         if food_persons is not None:
             food_children = min(food_children, food_persons)
+        food_platters = (
+            0
+            if payload.clear_food
+            else (
+                payload.food_platters
+                if payload.food_platters is not None
+                else reservation.food_platters
+            )
+        )
         discount = (
             payload.discount_amount
             if payload.discount_amount is not None
@@ -222,6 +233,7 @@ class ReservationController:
             food_formula=food_formula,  # type: ignore[arg-type]
             food_persons=food_persons,
             food_children=food_children,
+            food_platters=food_platters,
             discount=Decimal(str(discount)),
             tip=Decimal(str(tip)),
             extra=Decimal(str(extra)),
@@ -239,6 +251,7 @@ class ReservationController:
         reservation.food_formula = food_formula  # type: ignore[assignment]
         reservation.food_persons = food_persons
         reservation.food_children = food_children
+        reservation.food_platters = food_platters
         reservation.base_price_pool = breakdown["pool"]  # type: ignore[assignment]
         reservation.food_price_total = breakdown["food"]  # type: ignore[assignment]
         reservation.discount_amount = breakdown["discount"]  # type: ignore[assignment]
@@ -286,6 +299,7 @@ class ReservationController:
             food_formula=payload.food_formula,
             food_persons=payload.food_persons,
             food_children=food_children,
+            food_platters=payload.food_platters,
             discount=payload.discount_amount,
             tip=payload.tip_amount,
             extra=payload.extra_amount,

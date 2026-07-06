@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ApiError,
+  formatFoodSummary,
   type Reservation,
   STATUS_LABELS,
   type Status,
@@ -336,9 +337,7 @@ export function ReservationList({
                       {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""}
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
-                      {r.food_formula
-                        ? `${r.food_formula === "platters_14" ? "Plateaux" : "Menu"} × ${r.food_persons}`
-                        : "—"}
+                      {formatFoodSummary(r) ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-white font-medium whitespace-nowrap">
                       {Number(r.total_price).toFixed(2)} €

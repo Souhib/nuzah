@@ -14,7 +14,7 @@ const API_BASE = (
 // --- Types (mirror the backend Pydantic schemas) ---------------------------
 export type Slot = "morning" | "afternoon" | "evening" | "night";
 export type Status = "pending" | "confirmed" | "cancelled";
-export type FoodFormula = "platters_14" | "menu_19";
+export type FoodFormula = "platters_14" | "platters_30" | "menu_19";
 export type DepositMethod = "wero" | "revolut" | "paypal" | "cash" | "other";
 export type Tier = "small" | "medium" | "large";
 
@@ -42,6 +42,7 @@ export interface Reservation {
   food_formula: FoodFormula | null;
   food_persons: number | null;
   food_children: number;
+  food_platters: number;
   food_price_total: number;
   discount_amount: number;
   discount_reason: string | null;
@@ -93,6 +94,7 @@ export interface ReservationCreate {
   food_formula?: FoodFormula | null;
   food_persons?: number | null;
   food_children?: number;
+  food_platters?: number;
   discount_amount?: number;
   discount_reason?: string | null;
   extra_amount?: number;
@@ -113,6 +115,7 @@ export interface EstimateRequest {
   food_formula?: FoodFormula | null;
   food_persons?: number | null;
   food_children?: number;
+  food_platters?: number;
   discount_amount?: number;
   extra_amount?: number;
   tip_amount?: number;
@@ -272,10 +275,44 @@ export const STATUS_LABELS: Record<Status, string> = {
   cancelled: "Annulée",
 };
 
-export const FOOD_LABELS: Record<FoodFormula, { name: string; unit: number }> = {
-  platters_14: { name: "Plateaux à partager", unit: 14 },
-  menu_19: { name: "Menu traditionnel", unit: 19 },
+export const FOOD_LABELS: Record<
+  FoodFormula,
+  { name: string; short: string; unit: number; per: "person" | "platter"; legacy?: boolean }
+> = {
+  platters_14: {
+    name: "Plateaux à partager (ancien tarif)",
+    short: "Plateaux",
+    unit: 14,
+    per: "person",
+    legacy: true,
+  },
+  platters_30: {
+    name: "Plateaux à partager",
+    short: "Plateaux",
+    unit: 30,
+    per: "platter",
+  },
+  menu_19: {
+    name: "Menu traditionnel",
+    short: "Menu",
+    unit: 19,
+    per: "person",
+  },
 };
+
+/** Compact one-line food summary used in lists, tooltips, etc. */
+export function formatFoodSummary(
+  r: Pick<Reservation, "food_formula" | "food_persons" | "food_platters">,
+): string | null {
+  if (!r.food_formula) return null;
+  const label = FOOD_LABELS[r.food_formula];
+  if (label.per === "platter") {
+    const n = r.food_platters ?? 0;
+    return `${label.short} × ${n} plateau${n !== 1 ? "x" : ""}`;
+  }
+  const suffix = label.legacy ? " (ancien)" : "";
+  return `${label.short} × ${r.food_persons ?? 0} pers${suffix}`;
+}
 
 export const DEPOSIT_LABELS: Record<DepositMethod, string> = {
   wero: "Wero",
