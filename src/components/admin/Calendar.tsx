@@ -434,7 +434,7 @@ export function Calendar({
         </div>
 
         {viewMode === "week" && (
-          <div className="mt-3 flex items-center justify-center gap-4 flex-wrap">
+          <div className="mt-3 flex flex-col items-center gap-2">
             <button
               type="button"
               onClick={() => setShareOpen(true)}
