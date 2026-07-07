@@ -96,21 +96,27 @@ const SLOT_HOUR_LABELS: Record<Slot, string> = {
   night: "Nuit (22h-02h)",
 };
 
-const STATUS_COLORS: Record<Status, { dot: string; pill: string; text: string }> = {
+const STATUS_COLORS: Record<
+  Status,
+  { dot: string; pill: string; text: string; strip: string }
+> = {
   confirmed: {
     dot: "bg-emerald-400",
     pill: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
     text: "text-emerald-400",
+    strip: "bg-emerald-400",
   },
   pending: {
     dot: "bg-amber-400",
     pill: "bg-amber-500/10 border-amber-500/20 text-amber-400",
     text: "text-amber-400",
+    strip: "bg-amber-400",
   },
   cancelled: {
     dot: "bg-red-400/60",
     pill: "bg-red-500/10 border-red-500/20 text-red-400",
     text: "text-red-400",
+    strip: "bg-red-400/60",
   },
 };
 
@@ -182,6 +188,21 @@ function formatTime(iso: string): string {
   } catch {
     return "";
   }
+}
+
+/** Compact FR hour: `10h`, `14h30`. Tolerant to empty input. */
+function shortHour(iso: string): string {
+  const t = formatTime(iso);
+  if (!t) return "";
+  const [h, m] = t.split(":");
+  return m === "00" ? `${h}h` : `${h}h${m}`;
+}
+
+/** First whitespace-delimited token — used as a compact display name. */
+function firstToken(name: string): string {
+  const trimmed = name.trim();
+  const first = trimmed.split(/\s+/)[0];
+  return first && first.length > 0 ? first : trimmed;
 }
 
 interface DayBucket {
@@ -1331,12 +1352,14 @@ function MonthGrid({
         {Array.from({ length: 42 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-square rounded-lg bg-gray-900/50 border border-white/[0.06] animate-pulse"
+            className="min-h-[76px] sm:min-h-[104px] rounded-lg bg-gray-900/50 border border-white/[0.06] animate-pulse"
           />
         ))}
       </div>
     );
   }
+
+  const MAX_VISIBLE = 3;
 
   return (
     <div>
@@ -1357,11 +1380,11 @@ function MonthGrid({
           const inMonth = isSameMonth(date, monthStart);
           const isToday = isSameDay(date, today);
           const key = isoDate(date);
-          const list = (byDay.get(key) ?? []).filter(
-            (r) => r.status !== "cancelled",
-          );
-          const dots = list.slice(0, 4);
-          const overflow = list.length - dots.length;
+          const list = (byDay.get(key) ?? [])
+            .filter((r) => r.status !== "cancelled")
+            .sort((a, b) => a.start_at.localeCompare(b.start_at));
+          const visible = list.slice(0, MAX_VISIBLE);
+          const overflow = list.length - visible.length;
 
           return (
             <button
@@ -1369,7 +1392,7 @@ function MonthGrid({
               type="button"
               onClick={() => onDayClick(date)}
               className={cn(
-                "aspect-square rounded-lg border p-1.5 flex flex-col justify-between transition-colors text-left",
+                "min-h-[76px] sm:min-h-[104px] rounded-lg border p-1 sm:p-1.5 flex flex-col transition-colors text-left overflow-hidden",
                 inMonth
                   ? "bg-gray-900/40 border-white/[0.06] hover:border-[#02BAD6]/40"
                   : "bg-gray-900/20 border-white/[0.03] text-gray-600",
@@ -1378,7 +1401,7 @@ function MonthGrid({
             >
               <span
                 className={cn(
-                  "text-xs font-semibold tabular-nums leading-none",
+                  "text-[11px] sm:text-xs font-semibold tabular-nums leading-none mb-1",
                   isToday
                     ? "text-[#02BAD6]"
                     : inMonth
@@ -1390,18 +1413,28 @@ function MonthGrid({
               </span>
 
               {list.length > 0 && (
-                <div className="flex items-end gap-0.5 flex-wrap">
-                  {dots.map((r) => (
-                    <span
-                      key={r.id}
-                      className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        STATUS_COLORS[r.status].dot,
-                      )}
-                    />
-                  ))}
+                <div className="flex-1 flex flex-col gap-0.5 min-w-0 w-full">
+                  {visible.map((r) => {
+                    const c = STATUS_COLORS[r.status];
+                    return (
+                      <div
+                        key={r.id}
+                        className="flex items-center gap-1 min-w-0 leading-tight text-[9px] sm:text-[10px]"
+                      >
+                        <span
+                          className={cn("w-0.5 h-2.5 rounded-sm shrink-0", c.strip)}
+                        />
+                        <span className="text-gray-400 tabular-nums shrink-0">
+                          {shortHour(r.start_at)}
+                        </span>
+                        <span className={cn("truncate", c.text)}>
+                          {firstToken(r.customer_name)}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {overflow > 0 && (
-                    <span className="text-[9px] text-gray-500 leading-none ml-0.5">
+                    <span className="text-[9px] text-gray-500 leading-none mt-auto pl-1.5">
                       +{overflow}
                     </span>
                   )}
