@@ -18,11 +18,13 @@ import {
   ChevronRight,
   CircleCheck,
   Clock,
+  Copy,
   Euro,
   HandCoins,
   History,
   Loader2,
   Pencil,
+  Share2,
   Sparkles,
   Sun,
   Sunset,
@@ -48,6 +50,15 @@ const SLOT_ICONS: Record<Slot, typeof Sun> = {
 };
 
 const DAY_NAMES = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const DAY_NAMES_FULL = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+  "Dimanche",
+];
 const MONTH_NAMES = [
   "janv.",
   "févr.",
@@ -62,6 +73,28 @@ const MONTH_NAMES = [
   "nov.",
   "déc.",
 ];
+const MONTH_NAMES_FULL = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
+
+const ALL_SLOTS: Slot[] = ["morning", "afternoon", "evening", "night"];
+const SLOT_HOUR_LABELS: Record<Slot, string> = {
+  morning: "Matinée (10h-14h)",
+  afternoon: "Après-midi (14h-18h)",
+  evening: "Soirée (18h-22h)",
+  night: "Nuit (22h-02h)",
+};
 
 const STATUS_COLORS: Record<Status, { dot: string; pill: string; text: string }> = {
   confirmed: {
@@ -175,6 +208,76 @@ function bucketByDay(monday: Date, reservations: Reservation[]): DayBucket[] {
   return days;
 }
 
+// --- Availability sharing ---------------------------------------------------
+
+/** Monday-based day index: 0 = Monday, 6 = Sunday. */
+function dayIndexMondayBased(d: Date): number {
+  const js = d.getDay(); // 0 = Sun, 1..6 = Mon..Sat
+  return js === 0 ? 6 : js - 1;
+}
+
+function formatDayLong(d: Date): string {
+  return `${DAY_NAMES_FULL[dayIndexMondayBased(d)]} ${d.getDate()} ${MONTH_NAMES_FULL[d.getMonth()]}`;
+}
+
+function formatWeekRangeLong(monday: Date): string {
+  const sunday = addDays(monday, 6);
+  if (monday.getMonth() === sunday.getMonth()) {
+    return `du ${monday.getDate()} au ${sunday.getDate()} ${MONTH_NAMES_FULL[monday.getMonth()]}`;
+  }
+  return `du ${monday.getDate()} ${MONTH_NAMES_FULL[monday.getMonth()]} au ${sunday.getDate()} ${MONTH_NAMES_FULL[sunday.getMonth()]}`;
+}
+
+/**
+ * Build the WhatsApp-friendly availability message for a week. Days strictly
+ * before `today` (00:00) are skipped so a mid-week share only lists the days
+ * still in play. Slots with a `pending`/`confirmed` reservation count as
+ * booked; `cancelled` rows are ignored (slot goes back to free).
+ */
+function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string {
+  const todayStart = new Date(today);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const upcoming = days.filter((b) => {
+    const d = new Date(b.date);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() >= todayStart.getTime();
+  });
+  if (upcoming.length === 0) {
+    return `Semaine ${formatWeekRangeLong(monday)} — entièrement passée.`;
+  }
+
+  const lines: string[] = [];
+  lines.push(`Dispos semaine ${formatWeekRangeLong(monday)} 🏊`);
+  lines.push("");
+
+  let allComplet = true;
+  for (const bucket of upcoming) {
+    const busySlots = new Set<Slot>();
+    for (const slot of ALL_SLOTS) {
+      const rs = bucket.bySlot[slot] ?? [];
+      if (rs.some((r) => r.status !== "cancelled")) busySlots.add(slot);
+    }
+    const freeSlots = ALL_SLOTS.filter((s) => !busySlots.has(s));
+    const dayLabel = formatDayLong(bucket.date);
+    if (freeSlots.length === 0) {
+      lines.push(`*${dayLabel}* — complet`);
+    } else {
+      allComplet = false;
+      lines.push(`*${dayLabel}*`);
+      for (const s of freeSlots) lines.push(`✓ ${SLOT_HOUR_LABELS[s]}`);
+    }
+    lines.push("");
+  }
+
+  lines.push(
+    allComplet
+      ? "Semaine complète pour l'instant — dis-moi si tu veux être sur liste d'attente 🌸"
+      : "Fais-moi signe pour bloquer un créneau 🌸",
+  );
+  return lines.join("\n");
+}
+
 export function Calendar({
   token,
   onUnauthorized,
@@ -189,6 +292,7 @@ export function Calendar({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Reservation | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Range fetched depends on the active view.
   const range = useMemo(() => {
@@ -329,15 +433,25 @@ export function Calendar({
           </button>
         </div>
 
-        {viewMode === "week" && !isCurrentWeek && (
-          <div className="mt-3 flex justify-center">
+        {viewMode === "week" && (
+          <div className="mt-3 flex items-center justify-center gap-4 flex-wrap">
             <button
               type="button"
-              onClick={() => setMonday(startOfWeek(today))}
-              className="text-xs text-[#02BAD6] hover:text-[#00d4f5] underline"
+              onClick={() => setShareOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#02BAD6]/10 border border-[#02BAD6]/20 text-[#02BAD6] text-xs font-medium hover:bg-[#02BAD6]/15 transition-colors"
             >
-              Revenir à aujourd'hui
+              <Share2 className="w-3.5 h-3.5" />
+              Partager les créneaux dispos
             </button>
+            {!isCurrentWeek && (
+              <button
+                type="button"
+                onClick={() => setMonday(startOfWeek(today))}
+                className="text-xs text-[#02BAD6] hover:text-[#00d4f5] underline"
+              >
+                Revenir à aujourd'hui
+              </button>
+            )}
           </div>
         )}
         {viewMode === "month" && !isCurrentMonth && (
@@ -522,6 +636,16 @@ export function Calendar({
             })}
       </div>
       )}
+
+      {/* Share availability modal */}
+      <AnimatePresence>
+        {shareOpen && (
+          <ShareAvailabilityModal
+            message={buildDispoMessage(monday, days, today)}
+            onClose={() => setShareOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Detail modal */}
       <AnimatePresence>
@@ -876,6 +1000,121 @@ function Row({
       <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
       <span className={cn("text-sm text-gray-300 text-right", valueClass)}>{value}</span>
     </div>
+  );
+}
+
+function ShareAvailabilityModal({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState(message);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => setText(message), [message]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const copy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API refused (permissions, http, older browser).
+      // The textarea is editable + selectable so the admin can Ctrl+A / Ctrl+C manually.
+    }
+  }, [text]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="bg-gray-900 border border-white/[0.08] rounded-2xl w-full max-w-lg shadow-2xl"
+        initial={{ scale: 0.96, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.96, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#02BAD6]/10 flex items-center justify-center">
+              <Share2 className="w-4 h-4 text-[#02BAD6]" />
+            </div>
+            <h3 className="text-white font-semibold text-sm">
+              Partager les créneaux dispos
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="w-8 h-8 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.06] flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5 space-y-3">
+          <p className="text-xs text-gray-500">
+            Modifie le texte si besoin, puis colle-le sur WhatsApp. Le format
+            <span className="mx-1 px-1.5 rounded bg-gray-800/60 border border-white/[0.06] font-mono">
+              *jour*
+            </span>
+            met le nom en gras dans WhatsApp.
+          </p>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={14}
+            className="w-full bg-gray-800/60 border border-white/[0.08] text-gray-100 rounded-xl px-4 py-3 font-mono text-xs whitespace-pre focus:border-[#02BAD6] focus:ring-2 focus:ring-[#02BAD6]/20 focus:outline-none resize-y tabular-nums"
+          />
+        </div>
+        <div className="px-5 py-4 border-t border-white/[0.06] flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl border border-white/[0.08] text-gray-300 hover:bg-white/[0.04] transition-colors text-sm"
+          >
+            Fermer
+          </button>
+          <button
+            type="button"
+            onClick={copy}
+            className={cn(
+              "px-4 py-2 rounded-xl text-white font-medium text-sm flex items-center gap-2 transition-colors",
+              copied
+                ? "bg-emerald-500 hover:bg-emerald-500"
+                : "bg-[#02BAD6] hover:bg-[#00d4f5]",
+            )}
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copié
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copier le message
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
