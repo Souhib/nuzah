@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ApiError,
@@ -13,6 +13,7 @@ import {
 import {
   AlertTriangle,
   CalendarDays,
+  ChefHat,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -306,7 +307,7 @@ export function Calendar({
   onEdit,
   onViewCustomer,
 }: CalendarProps) {
-  const [viewMode, setViewMode] = useState<"week" | "month">("week");
+  const [viewMode, setViewMode] = useState<"overview" | "week" | "month">("week");
   const [monday, setMonday] = useState(() => startOfWeek(new Date()));
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -335,13 +336,14 @@ export function Calendar({
     };
   }, [flashDate]);
 
-  // Range fetched depends on the active view.
+  // Range fetched depends on the active view. `overview` shares the same
+  // 7-day window as `week` — both navigate via `monday`.
   const range = useMemo(() => {
-    if (viewMode === "week") {
-      return { from: monday, to: addDays(monday, 6) };
+    if (viewMode === "month") {
+      const grid = buildMonthGrid(month);
+      return { from: grid[0]!, to: grid[grid.length - 1]! };
     }
-    const grid = buildMonthGrid(month);
-    return { from: grid[0]!, to: grid[grid.length - 1]! };
+    return { from: monday, to: addDays(monday, 6) };
   }, [viewMode, monday, month]);
 
   const load = useCallback(() => {
@@ -377,7 +379,7 @@ export function Calendar({
   // In month mode the range is 42 days (grid) which SPILLS into adjacent months
   // — filter to the displayed month to avoid double-counting neighbouring resas.
   const statsScope = useMemo(() => {
-    if (viewMode === "week") return reservations;
+    if (viewMode !== "month") return reservations;
     return reservations.filter((r) => {
       const d = new Date(r.start_at);
       return (
@@ -420,19 +422,25 @@ export function Calendar({
         {/* View toggle */}
         <div className="mb-3 flex justify-center">
           <div className="inline-flex p-1 rounded-xl bg-gray-800/50 border border-white/[0.06]">
-            {(["week", "month"] as const).map((m) => (
+            {(
+              [
+                { v: "overview", label: "Aperçu" },
+                { v: "week", label: "Semaine" },
+                { v: "month", label: "Mois" },
+              ] as const
+            ).map((opt) => (
               <button
-                key={m}
+                key={opt.v}
                 type="button"
-                onClick={() => setViewMode(m)}
+                onClick={() => setViewMode(opt.v)}
                 className={cn(
                   "px-4 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                  viewMode === m
+                  viewMode === opt.v
                     ? "bg-[#02BAD6] text-white shadow"
                     : "text-gray-400 hover:text-white",
                 )}
               >
-                {m === "week" ? "Semaine" : "Mois"}
+                {opt.label}
               </button>
             ))}
           </div>
@@ -442,11 +450,11 @@ export function Calendar({
           <button
             type="button"
             onClick={() => {
-              if (viewMode === "week") setMonday((m) => addDays(m, -7));
-              else setMonth((m) => addMonths(m, -1));
+              if (viewMode === "month") setMonth((m) => addMonths(m, -1));
+              else setMonday((m) => addDays(m, -7));
             }}
             className="w-10 h-10 rounded-xl border border-white/[0.08] text-gray-300 hover:border-[#02BAD6] hover:text-[#02BAD6] transition-colors flex items-center justify-center"
-            aria-label={viewMode === "week" ? "Semaine précédente" : "Mois précédent"}
+            aria-label={viewMode === "month" ? "Mois précédent" : "Semaine précédente"}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -454,21 +462,27 @@ export function Calendar({
           <div className="flex-1 min-w-0 text-center">
             <div className="flex items-center justify-center gap-2 text-gray-400 text-xs uppercase tracking-wider mb-0.5">
               <CalendarDays className="w-3.5 h-3.5" />
-              <span>{viewMode === "week" ? "Semaine" : "Mois"}</span>
+              <span>
+                {viewMode === "month"
+                  ? "Mois"
+                  : viewMode === "overview"
+                    ? "Aperçu"
+                    : "Semaine"}
+              </span>
             </div>
             <p className="text-white font-semibold text-sm sm:text-base truncate">
-              {viewMode === "week" ? formatWeekHeader(monday) : formatMonthHeader(month)}
+              {viewMode === "month" ? formatMonthHeader(month) : formatWeekHeader(monday)}
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => {
-              if (viewMode === "week") setMonday((m) => addDays(m, 7));
-              else setMonth((m) => addMonths(m, 1));
+              if (viewMode === "month") setMonth((m) => addMonths(m, 1));
+              else setMonday((m) => addDays(m, 7));
             }}
             className="w-10 h-10 rounded-xl border border-white/[0.08] text-gray-300 hover:border-[#02BAD6] hover:text-[#02BAD6] transition-colors flex items-center justify-center"
-            aria-label={viewMode === "week" ? "Semaine suivante" : "Mois suivant"}
+            aria-label={viewMode === "month" ? "Mois suivant" : "Semaine suivante"}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -493,6 +507,17 @@ export function Calendar({
                 Revenir à aujourd'hui
               </button>
             )}
+          </div>
+        )}
+        {viewMode === "overview" && !isCurrentWeek && (
+          <div className="mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setMonday(startOfWeek(today))}
+              className="text-xs text-[#02BAD6] hover:text-[#00d4f5] underline"
+            >
+              Revenir à aujourd'hui
+            </button>
           </div>
         )}
         {viewMode === "month" && !isCurrentMonth && (
@@ -549,6 +574,11 @@ export function Calendar({
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           {error}
         </div>
+      )}
+
+      {/* --- OVERVIEW view (simple, read-only visualisation) --- */}
+      {viewMode === "overview" && (
+        <OverviewGrid days={days} today={today} loading={loading} />
       )}
 
       {/* --- MONTH view --- */}
@@ -1208,6 +1238,199 @@ function HourChips({ reservations }: { reservations: Reservation[] }) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Read-only "planner-style" weekly overview: 4 slot columns × 7 day rows.
+ * No clicks, no edits — just a calm bird's-eye view. Free slots show a
+ * dashed placeholder, booked slots show the customer's first name, actual
+ * hours (useful when custom), guest count, and a chef-hat marker if food
+ * was ordered. Cancelled reservations are hidden (treated as free).
+ */
+function OverviewGrid({
+  days,
+  today,
+  loading,
+}: {
+  days: DayBucket[];
+  today: Date;
+  loading: boolean;
+}) {
+  const columns: {
+    slot: Slot;
+    label: string;
+    hours: string;
+    Icon: typeof Sun;
+  }[] = [
+    { slot: "morning", label: "Matinée", hours: "10 – 14h", Icon: Sun },
+    { slot: "afternoon", label: "Après-midi", hours: "14 – 18h", Icon: Sunset },
+    { slot: "evening", label: "Soirée", hours: "18 – 22h", Icon: Moon },
+    { slot: "night", label: "Nuit", hours: "22 – 02h", Icon: Sparkles },
+  ];
+
+  if (loading) {
+    return (
+      <div
+        className="grid gap-1.5"
+        style={{
+          gridTemplateColumns: "minmax(48px, auto) repeat(4, minmax(0, 1fr))",
+        }}
+      >
+        <div />
+        {columns.map((c) => (
+          <div key={c.slot} className="h-12 rounded-lg bg-gray-900/50 animate-pulse" />
+        ))}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Fragment key={i}>
+            <div className="h-16 rounded bg-gray-900/40 animate-pulse" />
+            {columns.map((c) => (
+              <div
+                key={c.slot}
+                className="h-16 rounded-lg bg-gray-900/40 animate-pulse"
+              />
+            ))}
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div
+        className="grid gap-1.5"
+        style={{
+          gridTemplateColumns: "minmax(48px, auto) repeat(4, minmax(0, 1fr))",
+        }}
+      >
+        {/* Corner spacer */}
+        <div />
+        {/* Slot column headers */}
+        {columns.map(({ slot, label, hours, Icon }) => (
+          <div
+            key={slot}
+            className="text-center py-1.5 sm:py-2 border-b border-white/[0.05]"
+          >
+            <Icon className="w-3.5 h-3.5 mx-auto text-gray-500 mb-0.5" />
+            <p className="text-[10px] sm:text-xs font-semibold text-gray-300 leading-tight">
+              {label}
+            </p>
+            <p className="text-[9px] sm:text-[10px] text-gray-500 tabular-nums leading-tight">
+              {hours}
+            </p>
+          </div>
+        ))}
+
+        {/* Day rows */}
+        {days.map((bucket, dayIdx) => {
+          const isToday = isSameDay(bucket.date, today);
+          return (
+            <Fragment key={bucket.date.toISOString()}>
+              {/* Row label — day abbrev + date, cyan when today */}
+              <div className="flex flex-col items-end justify-center pr-1 sm:pr-2">
+                <span
+                  className={cn(
+                    "text-[10px] uppercase tracking-wider font-medium leading-none",
+                    isToday ? "text-[#02BAD6]" : "text-gray-500",
+                  )}
+                >
+                  {DAY_NAMES[dayIdx]}
+                </span>
+                <span
+                  className={cn(
+                    "text-lg sm:text-xl font-bold leading-none tabular-nums mt-0.5",
+                    isToday ? "text-[#02BAD6]" : "text-gray-200",
+                  )}
+                >
+                  {bucket.date.getDate()}
+                </span>
+              </div>
+
+              {/* Slot cells */}
+              {columns.map(({ slot }) => {
+                const rs = (bucket.bySlot[slot] ?? [])
+                  .filter((r) => r.status !== "cancelled")
+                  .sort((a, b) => a.start_at.localeCompare(b.start_at));
+
+                if (rs.length === 0) {
+                  return (
+                    <div
+                      key={slot}
+                      className={cn(
+                        "rounded-lg border border-dashed min-h-[68px] sm:min-h-[80px]",
+                        isToday
+                          ? "bg-[#02BAD6]/[0.02] border-[#02BAD6]/10"
+                          : "bg-gray-900/20 border-white/[0.05]",
+                      )}
+                    />
+                  );
+                }
+
+                const first = rs[0]!;
+                const overflow = rs.length - 1;
+                const confirmed = first.status === "confirmed";
+                return (
+                  <div
+                    key={slot}
+                    className={cn(
+                      "rounded-lg border min-h-[68px] sm:min-h-[80px] p-1.5 sm:p-2 flex flex-col justify-center overflow-hidden",
+                      confirmed
+                        ? "bg-emerald-500/[0.08] border-emerald-500/25"
+                        : "bg-amber-500/[0.08] border-amber-500/25",
+                    )}
+                  >
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span
+                        className={cn(
+                          "text-[11px] sm:text-sm font-semibold truncate",
+                          confirmed ? "text-emerald-300" : "text-amber-300",
+                        )}
+                      >
+                        {firstToken(first.customer_name)}
+                      </span>
+                      {first.food_formula && (
+                        <ChefHat className="w-3 h-3 shrink-0 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="text-[9px] sm:text-[10px] text-gray-400 tabular-nums leading-tight mt-0.5">
+                      {shortHour(first.start_at)}-{shortHour(first.end_at)}
+                    </div>
+                    <div className="text-[9px] sm:text-[10px] text-gray-400 leading-tight">
+                      {first.adults + first.children} pers
+                    </div>
+                    {overflow > 0 && (
+                      <div className="text-[9px] text-gray-500 leading-none mt-0.5">
+                        +{overflow} autre{overflow > 1 ? "s" : ""}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </Fragment>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 flex items-center justify-center gap-4 flex-wrap text-[10px] text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/30 border border-emerald-500/50" />
+          Confirmé
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-sm bg-amber-500/30 border border-amber-500/50" />
+          En attente
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-sm border border-dashed border-white/20" />
+          Libre
+        </span>
+        <span className="flex items-center gap-1">
+          <ChefHat className="w-3 h-3" /> Repas commandé
+        </span>
+      </div>
     </div>
   );
 }
