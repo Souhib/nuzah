@@ -38,6 +38,7 @@ export interface Reservation {
   customer_phone: string;
   adults: number;
   children: number;
+  babies: number;
   base_price_pool: number;
   food_formula: FoodFormula | null;
   food_persons: number | null;
@@ -91,6 +92,7 @@ export interface ReservationCreate {
   customer_phone: string;
   adults: number;
   children: number;
+  babies?: number;
   food_formula?: FoodFormula | null;
   food_persons?: number | null;
   food_children?: number;

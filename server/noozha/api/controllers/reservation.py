@@ -127,6 +127,7 @@ class ReservationController:
             customer_phone=payload.customer_phone.strip(),
             adults=payload.adults,
             children=payload.children,
+            babies=payload.babies,
             base_price_pool=breakdown["pool"],  # type: ignore[arg-type]
             food_formula=payload.food_formula,  # type: ignore[arg-type]
             food_persons=payload.food_persons,
@@ -164,6 +165,9 @@ class ReservationController:
         adults = payload.adults if payload.adults is not None else reservation.adults
         children = (
             payload.children if payload.children is not None else reservation.children
+        )
+        babies = (
+            payload.babies if payload.babies is not None else reservation.babies
         )
         cls._ensure_guests(adults, children)
 
@@ -248,6 +252,7 @@ class ReservationController:
             reservation.customer_phone = payload.customer_phone.strip()
         reservation.adults = adults
         reservation.children = children
+        reservation.babies = babies
         reservation.food_formula = food_formula  # type: ignore[assignment]
         reservation.food_persons = food_persons
         reservation.food_children = food_children

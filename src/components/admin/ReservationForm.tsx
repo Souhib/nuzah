@@ -345,6 +345,7 @@ export function ReservationForm({
         endTime: SLOT_DEFAULT_HOURS.afternoon.end,
         adults: 6,
         children: 0,
+        babies: 0,
         foodFormula: "" as FoodFormula | "",
         foodPersons: 0,
         foodChildren: 0,
@@ -371,6 +372,7 @@ export function ReservationForm({
       endTime: endParts.time,
       adults: initial.adults,
       children: initial.children,
+      babies: initial.babies ?? 0,
       foodFormula: (initial.food_formula ?? "") as FoodFormula | "",
       foodPersons: initial.food_persons ?? 0,
       foodChildren: initial.food_children ?? 0,
@@ -396,6 +398,7 @@ export function ReservationForm({
   const [endTime, setEndTime] = useState(seed.endTime);
   const [adults, setAdults] = useState(seed.adults);
   const [children, setChildren] = useState(seed.children);
+  const [babies, setBabies] = useState(seed.babies);
   const [foodFormula, setFoodFormula] = useState<FoodFormula | "">(seed.foodFormula);
   const [foodPersons, setFoodPersons] = useState(seed.foodPersons);
   const [foodChildren, setFoodChildren] = useState(seed.foodChildren);
@@ -470,6 +473,7 @@ export function ReservationForm({
     setSlotAndReset("afternoon");
     setAdults(6);
     setChildren(0);
+    setBabies(0);
     setFoodFormula("");
     setFoodPersons(0);
     setFoodChildren(0);
@@ -510,6 +514,7 @@ export function ReservationForm({
         customer_phone: telephone.trim(),
         adults,
         children,
+        babies,
         food_formula: foodFormula || null,
         food_persons: foodFormula && !isPlatter30 ? foodPersons : null,
         food_children: foodFormula && !isPlatter30 ? foodChildren : 0,
@@ -688,7 +693,7 @@ export function ReservationForm({
 
         {/* Personnes */}
         <SectionCard icon={Users} title="Personnes">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <Stepper
               label="Adultes"
               icon={User}
@@ -700,11 +705,20 @@ export function ReservationForm({
             <Stepper
               label="Enfants"
               icon={Baby}
-              hint="< 12 ans, tarif -50%"
+              hint="< 12 ans, -50%"
               value={children}
               onChange={setChildren}
               min={0}
               max={30}
+            />
+            <Stepper
+              label="Bébés"
+              icon={Baby}
+              hint="≤ 3 ans, gratuit"
+              value={babies}
+              onChange={setBabies}
+              min={0}
+              max={20}
             />
           </div>
         </SectionCard>

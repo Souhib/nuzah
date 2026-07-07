@@ -334,7 +334,7 @@ export function ReservationList({
                       {SLOT_SHORT[r.slot]}
                     </td>
                     <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
-                      {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""}
+                      {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""}{r.babies > 0 ? ` + ${r.babies}B` : ""}
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
                       {formatFoodSummary(r) ?? "—"}

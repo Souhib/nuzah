@@ -35,6 +35,7 @@ class ReservationBase(BaseModel):
     customer_phone: str = Field(default="", max_length=40)
     adults: int = Field(..., ge=0, le=50)
     children: int = Field(..., ge=0, le=50)
+    babies: int = Field(default=0, ge=0, le=50)
     food_formula: FoodFormula | None = None
     food_persons: int | None = Field(default=None, ge=0, le=60)
     food_children: int = Field(default=0, ge=0, le=60)
@@ -65,6 +66,7 @@ class ReservationUpdate(BaseModel):
     customer_phone: str | None = Field(default=None, max_length=40)
     adults: int | None = Field(default=None, ge=0, le=50)
     children: int | None = Field(default=None, ge=0, le=50)
+    babies: int | None = Field(default=None, ge=0, le=50)
     food_formula: FoodFormula | None = None
     clear_food: bool = False  # set true to explicitly null out the food fields
     food_persons: int | None = Field(default=None, ge=0, le=60)
@@ -119,6 +121,7 @@ class ReservationResponse(BaseModel):
     customer_phone: str
     adults: int
     children: int
+    babies: int
     base_price_pool: Money
     food_formula: FoodFormula | None
     food_persons: int | None

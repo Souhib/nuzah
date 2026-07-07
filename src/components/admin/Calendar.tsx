@@ -807,7 +807,7 @@ function DetailModal({
         </div>
 
         <div className="space-y-2 text-sm text-gray-300">
-          <Row label="Personnes" value={`${r.adults} adulte${r.adults !== 1 ? "s" : ""}${r.children > 0 ? ` + ${r.children} enfant${r.children !== 1 ? "s" : ""}` : ""}`} />
+          <Row label="Personnes" value={`${r.adults} adulte${r.adults !== 1 ? "s" : ""}${r.children > 0 ? ` + ${r.children} enfant${r.children !== 1 ? "s" : ""}` : ""}${r.babies > 0 ? ` + ${r.babies} bébé${r.babies !== 1 ? "s" : ""}` : ""}`} />
           <Row label="Bassin" value={`${Number(r.base_price_pool).toFixed(2)} €`} />
           {r.food_formula && (
             <Row

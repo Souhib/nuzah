@@ -139,3 +139,11 @@ async def _apply_pre_alembic_migrations(engine: AsyncEngine) -> None:
                 "ALTER TYPE food_formula ADD VALUE IF NOT EXISTS 'platters_30'"
             )
         )
+        # 2026-07-07: babies (0-3 y.o.) — informational head-count only,
+        # never priced. Existing rows default to 0.
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations "
+                "ADD COLUMN IF NOT EXISTS babies INTEGER NOT NULL DEFAULT 0"
+            )
+        )

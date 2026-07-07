@@ -74,6 +74,9 @@ class Reservation(BaseTable, table=True):
 
     adults: int = Field(default=0, ge=0, le=50)
     children: int = Field(default=0, ge=0, le=50)
+    # Babies (0-3 y.o.) — informational only, never contributes to pricing
+    # or tier calculation. Stored so the admin knows the actual head count.
+    babies: int = Field(default=0, ge=0, le=50)
 
     # Snapshot pricing — frozen at booking time. Future grid changes don't rewrite history.
     base_price_pool: Decimal = Field(

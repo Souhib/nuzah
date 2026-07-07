@@ -284,7 +284,8 @@ export function CustomerDetail({
                           </div>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {r.adults}A
-                            {r.children > 0 ? ` + ${r.children}E` : ""} ·{" "}
+                            {r.children > 0 ? ` + ${r.children}E` : ""}
+                            {r.babies > 0 ? ` + ${r.babies}B` : ""} ·{" "}
                             {Number(r.total_price).toFixed(0)}€
                             {r.food_formula && " · repas"}
                             {r.status === "cancelled" && " · annulée"}
