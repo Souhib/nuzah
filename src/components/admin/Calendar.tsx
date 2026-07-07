@@ -314,6 +314,26 @@ export function Calendar({
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Reservation | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  // The day the user clicked in month view — the matching week bucket
+  // scrolls into view and gets a one-shot glow. Cleared after the
+  // animation duration so the effect doesn't re-run on the next render.
+  const [flashDate, setFlashDate] = useState<Date | null>(null);
+  const flashCellRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!flashDate) return;
+    const scrollTimer = setTimeout(() => {
+      flashCellRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 60);
+    const clearTimer = setTimeout(() => setFlashDate(null), 2400);
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearTimer);
+    };
+  }, [flashDate]);
 
   // Range fetched depends on the active view.
   const range = useMemo(() => {
@@ -540,6 +560,7 @@ export function Calendar({
             today={today}
             loading={loading}
             onDayClick={(date) => {
+              setFlashDate(date);
               setViewMode("week");
               setMonday(startOfWeek(date));
             }}
@@ -571,11 +592,14 @@ export function Calendar({
             ))
           : days.map((bucket, idx) => {
               const isToday = isSameDay(bucket.date, today);
+              const isFlash =
+                flashDate !== null && isSameDay(bucket.date, flashDate);
               const hasReservations = bucket.all.length > 0;
               const dayName = DAY_NAMES[idx];
               return (
                 <motion.div
                   key={bucket.date.toISOString()}
+                  ref={isFlash ? flashCellRef : undefined}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.18, delay: idx * 0.02 }}
@@ -584,6 +608,7 @@ export function Calendar({
                     isToday
                       ? "bg-[#02BAD6]/[0.04] border-[#02BAD6]/30"
                       : "bg-gray-900/40 border-white/[0.06]",
+                    isFlash && "flash-day-highlight",
                   )}
                 >
                   {/* Day header */}

@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* ─── Admin week-view flash: called when the user jumps from month to
+   week via a day click. Animates a cyan ring around the target day that
+   pulses in, holds briefly, then fades. Sits on top of the "today" style
+   so it works even on today. Ends on transparent so no residue remains. */
+@keyframes flash-day-highlight {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(2, 186, 214, 0),
+      0 0 0 rgba(2, 186, 214, 0);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  15% {
+    box-shadow:
+      0 0 0 3px rgba(2, 186, 214, 0.85),
+      0 0 28px 4px rgba(2, 186, 214, 0.55);
+    border-color: #02BAD6;
+  }
+  45% {
+    box-shadow:
+      0 0 0 3px rgba(2, 186, 214, 0.7),
+      0 0 34px 6px rgba(2, 186, 214, 0.45);
+    border-color: #02BAD6;
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(2, 186, 214, 0),
+      0 0 0 rgba(2, 186, 214, 0);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+}
+.flash-day-highlight {
+  animation: flash-day-highlight 2.2s ease-out both;
+}
+
 /* ─── Noozha Admin Date Picker ─── */
 .noozha-datepicker {
   --rdp-accent-color: #02BAD6;
