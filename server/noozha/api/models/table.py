@@ -43,6 +43,15 @@ class DepositMethod(StrEnum):
     OTHER = "other"
 
 
+class ContactChannel(StrEnum):
+    """Where the reservation was booked from — informational, no pricing effect."""
+
+    WHATSAPP = "whatsapp"
+    INSTAGRAM = "instagram"
+    PHONE = "phone"
+    OTHER = "other"
+
+
 class AdminUser(BaseTable, table=True):
     __tablename__ = "admin_users"
 
@@ -71,6 +80,17 @@ class Reservation(BaseTable, table=True):
 
     customer_name: str = Field(max_length=200)
     customer_phone: str = Field(max_length=40)
+    contact_channel: ContactChannel | None = Field(
+        default=None,
+        sa_column=Column(
+            SqlEnum(
+                ContactChannel,
+                name="contact_channel",
+                values_callable=lambda e: [m.value for m in e],
+            ),
+            nullable=True,
+        ),
+    )
 
     adults: int = Field(default=0, ge=0, le=50)
     children: int = Field(default=0, ge=0, le=50)

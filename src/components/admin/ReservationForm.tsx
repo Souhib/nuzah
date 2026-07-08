@@ -4,6 +4,7 @@ import { DayPicker } from "react-day-picker";
 import { fr } from "react-day-picker/locale";
 import {
   ApiError,
+  type ContactChannel,
   type DepositMethod,
   FOOD_LABELS,
   type FoodFormula,
@@ -28,9 +29,12 @@ import {
   Clock,
   Euro,
   HandCoins,
+  Instagram,
   Loader2,
+  MessageCircle,
   Minus,
   Moon,
+  MoreHorizontal,
   Package,
   Percent,
   Phone,
@@ -76,6 +80,17 @@ const DEPOSIT_METHODS: { value: DepositMethod; label: string }[] = [
   { value: "paypal", label: "PayPal" },
   { value: "cash", label: "Espèces" },
   { value: "other", label: "Autre" },
+];
+
+const CONTACT_CHANNELS: {
+  value: ContactChannel;
+  label: string;
+  Icon: typeof Phone;
+}[] = [
+  { value: "whatsapp", label: "WhatsApp", Icon: MessageCircle },
+  { value: "instagram", label: "Instagram", Icon: Instagram },
+  { value: "phone", label: "Téléphone", Icon: Phone },
+  { value: "other", label: "Autre", Icon: MoreHorizontal },
 ];
 
 const inputClass =
@@ -339,6 +354,7 @@ export function ReservationForm({
       return {
         client: "",
         telephone: "",
+        contactChannel: "whatsapp" as ContactChannel | null,
         date: "",
         slot: "afternoon" as Slot,
         startTime: SLOT_DEFAULT_HOURS.afternoon.start,
@@ -366,6 +382,7 @@ export function ReservationForm({
     return {
       client: initial.customer_name,
       telephone: initial.customer_phone,
+      contactChannel: initial.contact_channel,
       date: startParts.date,
       slot: initial.slot,
       startTime: startParts.time,
@@ -392,6 +409,9 @@ export function ReservationForm({
   // Form state
   const [client, setClient] = useState(seed.client);
   const [telephone, setTelephone] = useState(seed.telephone);
+  const [contactChannel, setContactChannel] = useState<ContactChannel | null>(
+    seed.contactChannel,
+  );
   const [date, setDate] = useState(seed.date);
   const [slot, setSlot] = useState<Slot>(seed.slot);
   const [startTime, setStartTime] = useState(seed.startTime);
@@ -469,6 +489,7 @@ export function ReservationForm({
     if (isEdit) return; // editing: keep values until parent unmounts
     setClient("");
     setTelephone("");
+    setContactChannel("whatsapp");
     setDate("");
     setSlotAndReset("afternoon");
     setAdults(6);
@@ -512,6 +533,7 @@ export function ReservationForm({
           : {}),
         customer_name: client.trim(),
         customer_phone: telephone.trim(),
+        contact_channel: contactChannel,
         adults,
         children,
         babies,
@@ -594,34 +616,62 @@ export function ReservationForm({
 
         {/* Client */}
         <SectionCard icon={User} title="Informations client">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="block">
-              <span className="text-gray-400 text-sm mb-1.5 block">Nom *</span>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <input
-                  type="text"
-                  required
-                  value={client}
-                  onChange={(e) => setClient(e.target.value)}
-                  className={cn(inputClass, "pl-11")}
-                  placeholder="Fatima B."
-                />
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label className="block">
+                <span className="text-gray-400 text-sm mb-1.5 block">Nom *</span>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input
+                    type="text"
+                    required
+                    value={client}
+                    onChange={(e) => setClient(e.target.value)}
+                    className={cn(inputClass, "pl-11")}
+                    placeholder="Fatima B."
+                  />
+                </div>
+              </label>
+              <label className="block">
+                <span className="text-gray-400 text-sm mb-1.5 block">Téléphone</span>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input
+                    type="tel"
+                    value={telephone}
+                    onChange={(e) => setTelephone(e.target.value)}
+                    className={cn(inputClass, "pl-11")}
+                    placeholder="06 12 34 56 78 (optionnel)"
+                  />
+                </div>
+              </label>
+            </div>
+            <div>
+              <span className="text-gray-400 text-sm mb-2 block">
+                Canal de contact
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {CONTACT_CHANNELS.map(({ value, label, Icon }) => {
+                  const active = contactChannel === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setContactChannel(value)}
+                      className={cn(
+                        "p-2.5 rounded-xl border transition-all duration-200 flex items-center gap-2",
+                        active
+                          ? "bg-[#02BAD6]/10 border-[#02BAD6] text-[#02BAD6]"
+                          : "bg-gray-800/30 border-white/[0.08] text-gray-300 hover:border-white/[0.15]",
+                      )}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="text-sm font-medium">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            </label>
-            <label className="block">
-              <span className="text-gray-400 text-sm mb-1.5 block">Téléphone</span>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <input
-                  type="tel"
-                  value={telephone}
-                  onChange={(e) => setTelephone(e.target.value)}
-                  className={cn(inputClass, "pl-11")}
-                  placeholder="06 12 34 56 78 (optionnel)"
-                />
-              </div>
-            </label>
+            </div>
           </div>
         </SectionCard>
 

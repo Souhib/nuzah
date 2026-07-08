@@ -125,6 +125,7 @@ class ReservationController:
             end_at=end_at,  # type: ignore[arg-type]
             customer_name=payload.customer_name.strip(),
             customer_phone=payload.customer_phone.strip(),
+            contact_channel=payload.contact_channel,  # type: ignore[arg-type]
             adults=payload.adults,
             children=payload.children,
             babies=payload.babies,
@@ -250,6 +251,8 @@ class ReservationController:
             reservation.customer_name = payload.customer_name.strip()
         if payload.customer_phone is not None:
             reservation.customer_phone = payload.customer_phone.strip()
+        if payload.contact_channel is not None:
+            reservation.contact_channel = payload.contact_channel  # type: ignore[assignment]
         reservation.adults = adults
         reservation.children = children
         reservation.babies = babies

@@ -147,3 +147,22 @@ async def _apply_pre_alembic_migrations(engine: AsyncEngine) -> None:
                 "ADD COLUMN IF NOT EXISTS babies INTEGER NOT NULL DEFAULT 0"
             )
         )
+        # 2026-07-08: contact_channel — how the customer reached out
+        # (whatsapp/instagram/phone/other). Nullable so historical rows
+        # keep NULL until the admin fills them in.
+        # CREATE TYPE lacks IF NOT EXISTS — wrap in a DO block that swallows
+        # the duplicate_object exception so the migration stays idempotent.
+        await conn.execute(
+            text(
+                "DO $$ BEGIN "
+                "CREATE TYPE contact_channel AS ENUM "
+                "('whatsapp', 'instagram', 'phone', 'other'); "
+                "EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations "
+                "ADD COLUMN IF NOT EXISTS contact_channel contact_channel"
+            )
+        )

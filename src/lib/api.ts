@@ -16,6 +16,7 @@ export type Slot = "morning" | "afternoon" | "evening" | "night";
 export type Status = "pending" | "confirmed" | "cancelled";
 export type FoodFormula = "platters_14" | "platters_30" | "menu_19";
 export type DepositMethod = "wero" | "revolut" | "paypal" | "cash" | "other";
+export type ContactChannel = "whatsapp" | "instagram" | "phone" | "other";
 export type Tier = "small" | "medium" | "large";
 
 export interface AdminUser {
@@ -36,6 +37,7 @@ export interface Reservation {
   end_at: string;
   customer_name: string;
   customer_phone: string;
+  contact_channel: ContactChannel | null;
   adults: number;
   children: number;
   babies: number;
@@ -90,6 +92,7 @@ export interface ReservationCreate {
   end_at?: string | null;
   customer_name: string;
   customer_phone: string;
+  contact_channel?: ContactChannel | null;
   adults: number;
   children: number;
   babies?: number;
@@ -321,5 +324,12 @@ export const DEPOSIT_LABELS: Record<DepositMethod, string> = {
   revolut: "Revolut",
   paypal: "PayPal",
   cash: "Espèces",
+  other: "Autre",
+};
+
+export const CONTACT_CHANNEL_LABELS: Record<ContactChannel, string> = {
+  whatsapp: "WhatsApp",
+  instagram: "Instagram",
+  phone: "Téléphone",
   other: "Autre",
 };

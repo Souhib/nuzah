@@ -12,6 +12,7 @@ Slot = Literal["morning", "afternoon", "evening", "night"]
 Status = Literal["pending", "confirmed", "cancelled"]
 FoodFormula = Literal["platters_14", "platters_30", "menu_19"]
 DepositMethod = Literal["wero", "revolut", "paypal", "cash", "other"]
+ContactChannel = Literal["whatsapp", "instagram", "phone", "other"]
 
 
 class ReservationBase(BaseModel):
@@ -33,6 +34,7 @@ class ReservationBase(BaseModel):
     )
     customer_name: str = Field(..., min_length=1, max_length=200)
     customer_phone: str = Field(default="", max_length=40)
+    contact_channel: ContactChannel | None = None
     adults: int = Field(..., ge=0, le=50)
     children: int = Field(..., ge=0, le=50)
     babies: int = Field(default=0, ge=0, le=50)
@@ -64,6 +66,7 @@ class ReservationUpdate(BaseModel):
     end_at: datetime | None = None
     customer_name: str | None = Field(default=None, min_length=1, max_length=200)
     customer_phone: str | None = Field(default=None, max_length=40)
+    contact_channel: ContactChannel | None = None
     adults: int | None = Field(default=None, ge=0, le=50)
     children: int | None = Field(default=None, ge=0, le=50)
     babies: int | None = Field(default=None, ge=0, le=50)
@@ -119,6 +122,7 @@ class ReservationResponse(BaseModel):
     end_at: datetime
     customer_name: str
     customer_phone: str
+    contact_channel: ContactChannel | None
     adults: int
     children: int
     babies: int
