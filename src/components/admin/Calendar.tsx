@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ApiError,
   CONTACT_CHANNEL_LABELS,
+  type ContactChannel,
   formatFoodSummary,
   type Reservation,
   type Slot,
@@ -24,8 +25,12 @@ import {
   Euro,
   HandCoins,
   History,
+  Instagram,
   Loader2,
+  MessageCircle,
+  MoreHorizontal,
   Pencil,
+  Phone,
   Share2,
   Sparkles,
   Sun,
@@ -96,6 +101,13 @@ const SLOT_HOUR_LABELS: Record<Slot, string> = {
   afternoon: "Après-midi (14h-18h)",
   evening: "Soirée (18h-22h)",
   night: "Nuit (22h-02h)",
+};
+
+const CHANNEL_ICONS: Record<ContactChannel, typeof Phone> = {
+  whatsapp: MessageCircle,
+  instagram: Instagram,
+  phone: Phone,
+  other: MoreHorizontal,
 };
 
 const STATUS_COLORS: Record<
@@ -695,6 +707,17 @@ export function Calendar({
                                 <span className="text-sm text-gray-200 truncate">
                                   {r.customer_name}
                                 </span>
+                                {r.contact_channel && (() => {
+                                  const CIcon = CHANNEL_ICONS[r.contact_channel];
+                                  return (
+                                    <CIcon
+                                      className="w-3.5 h-3.5 text-gray-500 shrink-0"
+                                      aria-label={
+                                        CONTACT_CHANNEL_LABELS[r.contact_channel]
+                                      }
+                                    />
+                                  );
+                                })()}
                               </div>
                               <p className="text-xs text-gray-500 mt-0.5">
                                 {r.adults}A
@@ -1394,6 +1417,17 @@ function OverviewGrid({
                       >
                         {firstToken(first.customer_name)}
                       </span>
+                      {first.contact_channel && (() => {
+                        const CIcon = CHANNEL_ICONS[first.contact_channel];
+                        return (
+                          <CIcon
+                            className="w-3 h-3 shrink-0 text-gray-500"
+                            aria-label={
+                              CONTACT_CHANNEL_LABELS[first.contact_channel]
+                            }
+                          />
+                        );
+                      })()}
                       {first.food_formula && (
                         <ChefHat className="w-3 h-3 shrink-0 text-gray-400" />
                       )}
@@ -1549,6 +1583,17 @@ function MonthDayList({
                         <span className="text-sm text-gray-200 truncate">
                           {r.customer_name}
                         </span>
+                        {r.contact_channel && (() => {
+                          const CIcon = CHANNEL_ICONS[r.contact_channel];
+                          return (
+                            <CIcon
+                              className="w-3.5 h-3.5 text-gray-500 shrink-0"
+                              aria-label={
+                                CONTACT_CHANNEL_LABELS[r.contact_channel]
+                              }
+                            />
+                          );
+                        })()}
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">
                         {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""}
