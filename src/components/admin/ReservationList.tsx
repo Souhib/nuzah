@@ -18,6 +18,7 @@ import {
   Euro,
   History,
   Loader2,
+  ShoppingBag,
   Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -30,7 +31,7 @@ interface ReservationListProps {
   onViewCustomer: (customer: { name: string; phone: string }) => void;
 }
 
-const SLOT_SHORT: Record<Reservation["slot"], string> = {
+const SLOT_SHORT: Record<NonNullable<Reservation["slot"]>, string> = {
   morning: "Matinée",
   afternoon: "Aprem",
   evening: "Soirée",
@@ -331,10 +332,20 @@ export function ReservationList({
                       {formatStartAt(r.start_at)}
                     </td>
                     <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
-                      {SLOT_SHORT[r.slot]}
+                      {r.kind === "takeaway" ? (
+                        <span className="inline-flex items-center gap-1 text-[#02BAD6]">
+                          <ShoppingBag className="w-3.5 h-3.5" /> À emporter
+                        </span>
+                      ) : r.slot ? (
+                        SLOT_SHORT[r.slot]
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
-                      {r.adults}A{r.children > 0 ? ` + ${r.children}E` : ""}{r.babies > 0 ? ` + ${r.babies}B` : ""}
+                      {r.kind === "takeaway"
+                        ? "—"
+                        : `${r.adults}A${r.children > 0 ? ` + ${r.children}E` : ""}${r.babies > 0 ? ` + ${r.babies}B` : ""}`}
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
                       {formatFoodSummary(r) ?? "—"}

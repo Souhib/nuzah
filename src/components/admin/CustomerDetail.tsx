@@ -17,6 +17,7 @@ import {
   HandCoins,
   Loader2,
   Phone,
+  ShoppingBag,
   TrendingUp,
   User,
 } from "lucide-react";
@@ -279,14 +280,22 @@ export function CustomerDetail({
                               {formatDate(r.start_at)}
                             </span>
                             <span className="text-xs text-gray-500">
-                              · {SLOT_LABELS[r.slot as Slot].name}
+                              ·{" "}
+                              {r.kind === "takeaway"
+                                ? "À emporter"
+                                : r.slot
+                                  ? SLOT_LABELS[r.slot as Slot].name
+                                  : "—"}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {r.adults}A
-                            {r.children > 0 ? ` + ${r.children}E` : ""}
-                            {r.babies > 0 ? ` + ${r.babies}B` : ""} ·{" "}
-                            {Number(r.total_price).toFixed(0)}€
+                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                            {r.kind === "takeaway" && (
+                              <ShoppingBag className="w-3 h-3 text-[#02BAD6] shrink-0" />
+                            )}
+                            {r.kind === "takeaway"
+                              ? "Commande"
+                              : `${r.adults}A${r.children > 0 ? ` + ${r.children}E` : ""}${r.babies > 0 ? ` + ${r.babies}B` : ""}`}{" "}
+                            · {Number(r.total_price).toFixed(0)}€
                             {r.food_formula && " · repas"}
                             {r.status === "cancelled" && " · annulée"}
                           </p>

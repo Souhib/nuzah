@@ -10,6 +10,7 @@ from noozha.api.schemas.shared import BaseModel, Money
 
 Slot = Literal["morning", "afternoon", "evening", "night"]
 Status = Literal["pending", "confirmed", "cancelled"]
+ReservationKind = Literal["pool", "takeaway"]
 FoodFormula = Literal["platters_14", "platters_30", "menu_19"]
 DepositMethod = Literal["wero", "revolut", "paypal", "cash", "other"]
 ContactChannel = Literal["whatsapp", "instagram", "phone", "other"]
@@ -18,7 +19,8 @@ ContactChannel = Literal["whatsapp", "instagram", "phone", "other"]
 class ReservationBase(BaseModel):
     """Fields shared between create / update / response."""
 
-    slot: Slot
+    kind: ReservationKind = "pool"
+    slot: Slot | None = None
     date: str = Field(
         ...,
         pattern=r"^\d{4}-\d{2}-\d{2}$",
@@ -60,6 +62,7 @@ class ReservationCreate(ReservationBase):
 class ReservationUpdate(BaseModel):
     """PATCH /reservations/{id} — every field optional."""
 
+    kind: ReservationKind | None = None
     slot: Slot | None = None
     date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     start_at: datetime | None = None
@@ -117,7 +120,8 @@ class EstimateRequest(BaseModel):
 
 class ReservationResponse(BaseModel):
     id: UUID
-    slot: Slot
+    kind: ReservationKind
+    slot: Slot | None
     start_at: datetime
     end_at: datetime
     customer_name: str

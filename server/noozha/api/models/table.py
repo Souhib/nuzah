@@ -19,6 +19,19 @@ class Slot(StrEnum):
     NIGHT = "night"
 
 
+class ReservationKind(StrEnum):
+    """Pool booking vs food-only takeaway order.
+
+    - POOL: classic pool reservation with slot + guest count.
+    - TAKEAWAY: food order the customer picks up at a specific time; no pool
+      slot, no guest count (adults/children default 0), no pool pricing.
+      `start_at` stores the pickup time, `end_at` mirrors it.
+    """
+
+    POOL = "pool"
+    TAKEAWAY = "takeaway"
+
+
 class Status(StrEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
@@ -65,10 +78,23 @@ class Reservation(BaseTable, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    slot: Slot = Field(
+    kind: ReservationKind = Field(
+        default=ReservationKind.POOL,
+        sa_column=Column(
+            SqlEnum(
+                ReservationKind,
+                name="reservation_kind",
+                values_callable=lambda e: [m.value for m in e],
+            ),
+            nullable=False,
+            server_default="pool",
+        ),
+    )
+    slot: Slot | None = Field(
+        default=None,
         sa_column=Column(
             SqlEnum(Slot, name="slot", values_callable=lambda e: [m.value for m in e]),
-            nullable=False,
+            nullable=True,
         ),
     )
     start_at: datetime = Field(

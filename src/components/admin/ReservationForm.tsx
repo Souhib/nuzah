@@ -11,6 +11,7 @@ import {
   type PriceBreakdown,
   type Reservation,
   type ReservationCreate,
+  type ReservationKind,
   type ReservationUpdate,
   SLOT_LABELS,
   type Slot,
@@ -40,12 +41,14 @@ import {
   Phone,
   Plus,
   Save,
+  ShoppingBag,
   Sparkles,
   Sun,
   Sunset,
   User,
   Users,
   Wallet,
+  Waves,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -355,6 +358,7 @@ export function ReservationForm({
         client: "",
         telephone: "",
         contactChannel: "whatsapp" as ContactChannel | null,
+        kind: "pool" as ReservationKind,
         date: "",
         slot: "afternoon" as Slot,
         startTime: SLOT_DEFAULT_HOURS.afternoon.start,
@@ -383,8 +387,9 @@ export function ReservationForm({
       client: initial.customer_name,
       telephone: initial.customer_phone,
       contactChannel: initial.contact_channel,
+      kind: initial.kind,
       date: startParts.date,
-      slot: initial.slot,
+      slot: initial.slot ?? ("afternoon" as Slot),
       startTime: startParts.time,
       endTime: endParts.time,
       adults: initial.adults,
@@ -412,6 +417,7 @@ export function ReservationForm({
   const [contactChannel, setContactChannel] = useState<ContactChannel | null>(
     seed.contactChannel,
   );
+  const [kind, setKind] = useState<ReservationKind>(seed.kind);
   const [date, setDate] = useState(seed.date);
   const [slot, setSlot] = useState<Slot>(seed.slot);
   const [startTime, setStartTime] = useState(seed.startTime);
@@ -456,11 +462,14 @@ export function ReservationForm({
     const handle = setTimeout(() => {
       setEstimating(true);
       const isPlatter30 = foodFormula === "platters_30";
+      const isTakeaway = kind === "takeaway";
       api.reservations
         .estimate(token, {
           slot,
-          adults,
-          children,
+          // Takeaways have no pool guests → force 0 so pool_total is 0
+          // regardless of what pool-mode state the form is holding.
+          adults: isTakeaway ? 0 : adults,
+          children: isTakeaway ? 0 : children,
           food_formula: foodFormula || null,
           food_persons: foodFormula && !isPlatter30 ? foodPersons : null,
           food_children: foodFormula && !isPlatter30 ? foodChildren : 0,
@@ -476,7 +485,7 @@ export function ReservationForm({
         .finally(() => setEstimating(false));
     }, 250);
     return () => clearTimeout(handle);
-  }, [token, slot, adults, children, foodFormula, foodPersons, foodChildren, foodPlatters, discountAmount, extraAmount, tipAmount, onUnauthorized]);
+  }, [token, kind, slot, adults, children, foodFormula, foodPersons, foodChildren, foodPlatters, discountAmount, extraAmount, tipAmount, onUnauthorized]);
 
   const tierLabel = useMemo<string>(() => {
     if (!breakdown) return "—";
@@ -490,6 +499,7 @@ export function ReservationForm({
     setClient("");
     setTelephone("");
     setContactChannel("whatsapp");
+    setKind("pool");
     setDate("");
     setSlotAndReset("afternoon");
     setAdults(6);
@@ -524,18 +534,26 @@ export function ReservationForm({
       const crossesMidnight = slot === "night";
 
       const isPlatter30 = foodFormula === "platters_30";
+      const isTakeaway = kind === "takeaway";
+      // For takeaway: slot is null, start_at = pickup datetime, end_at mirrors.
+      const takeawayIso = isTakeaway ? toParisIso(date, startTime) : null;
       const payload: Record<string, unknown> = {
-        slot,
+        kind,
+        slot: isTakeaway ? null : slot,
         date,
-        ...(startOverride ? { start_at: toParisIso(date, startTime) } : {}),
-        ...(endOverride
-          ? { end_at: toParisIso(date, endTime, crossesMidnight ? 1 : 0) }
-          : {}),
+        ...(isTakeaway
+          ? { start_at: takeawayIso, end_at: takeawayIso }
+          : {
+              ...(startOverride ? { start_at: toParisIso(date, startTime) } : {}),
+              ...(endOverride
+                ? { end_at: toParisIso(date, endTime, crossesMidnight ? 1 : 0) }
+                : {}),
+            }),
         customer_name: client.trim(),
         customer_phone: telephone.trim(),
         contact_channel: contactChannel,
-        adults,
-        children,
+        adults: isTakeaway ? 0 : adults,
+        children: isTakeaway ? 0 : children,
         babies,
         food_formula: foodFormula || null,
         food_persons: foodFormula && !isPlatter30 ? foodPersons : null,
@@ -614,6 +632,54 @@ export function ReservationForm({
           )}
         </AnimatePresence>
 
+        {/* Kind toggle — first choice: pool booking vs takeaway order */}
+        <div className="grid grid-cols-2 gap-3">
+          {(
+            [
+              {
+                v: "pool" as ReservationKind,
+                label: "Piscine",
+                sub: "Réservation créneau",
+                Icon: Waves,
+              },
+              {
+                v: "takeaway" as ReservationKind,
+                label: "À emporter",
+                sub: "Commande à récupérer",
+                Icon: ShoppingBag,
+              },
+            ] as const
+          ).map(({ v, label, sub, Icon }) => {
+            const active = kind === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setKind(v)}
+                className={cn(
+                  "p-4 rounded-2xl border-2 transition-all duration-200 text-left flex items-start gap-3",
+                  active
+                    ? "bg-[#02BAD6]/10 border-[#02BAD6] text-[#02BAD6]"
+                    : "bg-gray-900/40 border-white/[0.06] text-gray-300 hover:border-white/[0.12]",
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                    active ? "bg-[#02BAD6]/20" : "bg-gray-800/50",
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">{label}</p>
+                  <p className="text-xs opacity-70">{sub}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Client */}
         <SectionCard icon={User} title="Informations client">
           <div className="space-y-4">
@@ -675,7 +741,8 @@ export function ReservationForm({
           </div>
         </SectionCard>
 
-        {/* Réservation : date + slot picker + horaires */}
+        {/* Réservation : date + slot picker + horaires (piscine only) */}
+        {kind === "pool" && (
         <SectionCard icon={Calendar} title="Créneau">
           <div className="space-y-5">
             <DatePickerField date={date} setDate={setDate} />
@@ -740,8 +807,36 @@ export function ReservationForm({
             </p>
           </div>
         </SectionCard>
+        )}
 
-        {/* Personnes */}
+        {/* Retrait : date + heure de pickup (takeaway only) */}
+        {kind === "takeaway" && (
+          <SectionCard icon={ShoppingBag} title="Retrait">
+            <div className="space-y-5">
+              <DatePickerField date={date} setDate={setDate} />
+              <label className="block max-w-xs">
+                <span className="text-gray-400 text-sm mb-1.5 block">
+                  Heure de retrait *
+                </span>
+                <div className="relative">
+                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Time24Input
+                    ariaLabel="Heure de retrait (24h)"
+                    value={startTime}
+                    onChange={setStartTime}
+                    className={cn(inputClass, "pl-11")}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Format 24h (ex. 12:00). L'heure à laquelle la cliente vient chercher la commande.
+                </p>
+              </label>
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Personnes (piscine only — takeaways ont adults=children=0) */}
+        {kind === "pool" && (
         <SectionCard icon={Users} title="Personnes">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <Stepper
@@ -772,10 +867,22 @@ export function ReservationForm({
             />
           </div>
         </SectionCard>
+        )}
 
-        {/* Repas (optionnel) */}
-        <SectionCard icon={ChefHat} title="Repas (optionnel)">
+        {/* Repas */}
+        <SectionCard
+          icon={ChefHat}
+          title={kind === "takeaway" ? "Repas" : "Repas (optionnel)"}
+        >
           <div className="space-y-4">
+            {kind === "takeaway" && (
+              <div className="p-3 rounded-xl bg-[#02BAD6]/[0.06] border border-[#02BAD6]/20 text-xs text-gray-300 flex items-start gap-2">
+                <Package className="w-4 h-4 shrink-0 mt-0.5 text-[#02BAD6]" />
+                <p>
+                  <span className="font-medium text-[#02BAD6]">Devis personnalisé</span> (demi-plateau, menu spécial…)&nbsp;: laisse « Aucun » ici et renseigne le prix + le libellé dans <span className="font-medium">Supplément au devis</span> ci-dessous.
+                </p>
+              </div>
+            )}
             {legacyPlatterEdit && foodFormula === "platters_14" && (
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -1026,7 +1133,7 @@ export function ReservationForm({
         {/* Acompte + Statut + Notes */}
         <SectionCard icon={ClipboardList} title="Suivi">
           <div className="space-y-4">
-            {foodFormula ? (
+            {foodFormula || kind === "takeaway" ? (
               <>
                 <label
                   htmlFor="acompte"

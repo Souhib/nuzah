@@ -166,3 +166,25 @@ async def _apply_pre_alembic_migrations(engine: AsyncEngine) -> None:
                 "ADD COLUMN IF NOT EXISTS contact_channel contact_channel"
             )
         )
+        # 2026-07-10: reservation_kind — 'pool' (existing behaviour) vs
+        # 'takeaway' (food-only pickup order, no slot, no guest count).
+        # Existing rows are all pool → default preserves them.
+        await conn.execute(
+            text(
+                "DO $$ BEGIN "
+                "CREATE TYPE reservation_kind AS ENUM ('pool', 'takeaway'); "
+                "EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE reservations "
+                "ADD COLUMN IF NOT EXISTS kind reservation_kind "
+                "NOT NULL DEFAULT 'pool'"
+            )
+        )
+        # Takeaways have no slot → allow NULL. Idempotent: DROP NOT NULL is
+        # a no-op if the column is already nullable.
+        await conn.execute(
+            text("ALTER TABLE reservations ALTER COLUMN slot DROP NOT NULL")
+        )

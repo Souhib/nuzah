@@ -14,6 +14,7 @@ const API_BASE = (
 // --- Types (mirror the backend Pydantic schemas) ---------------------------
 export type Slot = "morning" | "afternoon" | "evening" | "night";
 export type Status = "pending" | "confirmed" | "cancelled";
+export type ReservationKind = "pool" | "takeaway";
 export type FoodFormula = "platters_14" | "platters_30" | "menu_19";
 export type DepositMethod = "wero" | "revolut" | "paypal" | "cash" | "other";
 export type ContactChannel = "whatsapp" | "instagram" | "phone" | "other";
@@ -32,7 +33,8 @@ export interface TokenResponse {
 
 export interface Reservation {
   id: string;
-  slot: Slot;
+  kind: ReservationKind;
+  slot: Slot | null;
   start_at: string;
   end_at: string;
   customer_name: string;
@@ -86,7 +88,8 @@ export interface SummaryResponse {
 }
 
 export interface ReservationCreate {
-  slot: Slot;
+  kind?: ReservationKind;
+  slot?: Slot | null;
   date: string; // YYYY-MM-DD
   start_at?: string | null;
   end_at?: string | null;

@@ -32,6 +32,7 @@ import {
   Pencil,
   Phone,
   Share2,
+  ShoppingBag,
   Sparkles,
   Sun,
   Sunset,
@@ -237,8 +238,13 @@ function bucketByDay(monday: Date, reservations: Reservation[]): DayBucket[] {
     if (dayIndex === -1) continue;
     const bucket = days[dayIndex]!;
     bucket.all.push(r);
-    if (!bucket.bySlot[r.slot]) bucket.bySlot[r.slot] = [];
-    bucket.bySlot[r.slot]!.push(r);
+    // Takeaway reservations have no slot — they still appear in bucket.all
+    // (used by the day listing / stats) but are skipped from the slot map
+    // (used by the Aperçu grid and availability computation).
+    if (r.slot) {
+      if (!bucket.bySlot[r.slot]) bucket.bySlot[r.slot] = [];
+      bucket.bySlot[r.slot]!.push(r);
+    }
   }
   return days;
 }
@@ -683,7 +689,7 @@ export function Calendar({
                   {hasReservations && (
                     <div className="border-t border-white/[0.04] divide-y divide-white/[0.04]">
                       {bucket.all.map((r) => {
-                        const SlotIcon = SLOT_ICONS[r.slot];
+                        const SlotIcon = r.slot ? SLOT_ICONS[r.slot] : ShoppingBag;
                         const colors = STATUS_COLORS[r.status];
                         return (
                           <button
@@ -692,11 +698,20 @@ export function Calendar({
                             onClick={() => setSelected(r)}
                             className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left"
                           >
-                            <SlotIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                            <SlotIcon
+                              className={cn(
+                                "w-4 h-4 shrink-0",
+                                r.kind === "takeaway"
+                                  ? "text-[#02BAD6]"
+                                  : "text-gray-500",
+                              )}
+                            />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-gray-500 font-mono">
-                                  {formatTime(r.start_at)}–{formatTime(r.end_at)}
+                                  {r.kind === "takeaway"
+                                    ? `retrait ${formatTime(r.start_at)}`
+                                    : `${formatTime(r.start_at)}–${formatTime(r.end_at)}`}
                                 </span>
                                 <span
                                   className={cn(
@@ -707,6 +722,11 @@ export function Calendar({
                                 <span className="text-sm text-gray-200 truncate">
                                   {r.customer_name}
                                 </span>
+                                {r.kind === "takeaway" && (
+                                  <span className="inline-block px-1.5 py-0.5 rounded bg-[#02BAD6]/10 border border-[#02BAD6]/20 text-[#02BAD6] text-[10px] font-semibold uppercase tracking-wider">
+                                    Emporter
+                                  </span>
+                                )}
                                 {r.contact_channel && (() => {
                                   const CIcon = CHANNEL_ICONS[r.contact_channel];
                                   return (
@@ -720,9 +740,10 @@ export function Calendar({
                                 })()}
                               </div>
                               <p className="text-xs text-gray-500 mt-0.5">
-                                {r.adults}A
-                                {r.children > 0 ? ` + ${r.children}E` : ""}
-                                {r.babies > 0 ? ` + ${r.babies}B` : ""} ·{" "}
+                                {r.kind === "takeaway"
+                                  ? "Commande à emporter"
+                                  : `${r.adults}A${r.children > 0 ? ` + ${r.children}E` : ""}${r.babies > 0 ? ` + ${r.babies}B` : ""}`}{" "}
+                                ·{" "}
                                 {Number(r.total_price).toFixed(0)}€
                                 {r.food_formula && " · repas"}
                               </p>
@@ -869,7 +890,11 @@ function DetailModal({
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-              {SLOT_LABELS[r.slot].name} · {formatTime(r.start_at)}–{formatTime(r.end_at)}
+              {r.kind === "takeaway"
+                ? `À emporter · retrait ${formatTime(r.start_at)}`
+                : r.slot
+                  ? `${SLOT_LABELS[r.slot].name} · ${formatTime(r.start_at)}–${formatTime(r.end_at)}`
+                  : `${formatTime(r.start_at)}–${formatTime(r.end_at)}`}
             </p>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-xl font-semibold text-white">{r.customer_name}</h3>
@@ -1353,9 +1378,13 @@ function OverviewGrid({
         {/* Day rows */}
         {days.map((bucket, dayIdx) => {
           const isToday = isSameDay(bucket.date, today);
+          const takeawayCount = bucket.all.filter(
+            (r) => r.kind === "takeaway" && r.status !== "cancelled",
+          ).length;
           return (
             <Fragment key={bucket.date.toISOString()}>
-              {/* Row label — day abbrev + date, cyan when today */}
+              {/* Row label — day abbrev + date, cyan when today,
+                  + takeaway count badge if any */}
               <div className="flex flex-col items-end justify-center pr-1 sm:pr-2">
                 <span
                   className={cn(
@@ -1373,6 +1402,15 @@ function OverviewGrid({
                 >
                   {bucket.date.getDate()}
                 </span>
+                {takeawayCount > 0 && (
+                  <span
+                    className="mt-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[#02BAD6]/10 border border-[#02BAD6]/20 text-[#02BAD6] text-[9px] font-medium tabular-nums leading-none"
+                    aria-label={`${takeawayCount} commande${takeawayCount > 1 ? "s" : ""} à emporter`}
+                  >
+                    <ShoppingBag className="w-2.5 h-2.5" />
+                    {takeawayCount}
+                  </span>
+                )}
               </div>
 
               {/* Slot cells */}
@@ -1564,7 +1602,7 @@ function MonthDayList({
             </div>
             <div className="border-t border-white/[0.04] divide-y divide-white/[0.04]">
               {rows.map((r) => {
-                const SlotIcon = SLOT_ICONS[r.slot];
+                const SlotIcon = r.slot ? SLOT_ICONS[r.slot] : ShoppingBag;
                 const c = STATUS_COLORS[r.status];
                 return (
                   <button

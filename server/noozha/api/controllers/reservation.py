@@ -32,12 +32,20 @@ class ReservationController:
 
     @staticmethod
     def _resolve_hours(
-        slot: str,
+        slot: str | None,
         iso_date: str,
         start_at: datetime | None,
         end_at: datetime | None,
     ) -> tuple[datetime, datetime]:
-        """Fill in default slot hours when the admin doesn't override them."""
+        """Fill in default hours from the slot when the admin doesn't override.
+
+        For takeaway (slot=None) there's no default — `start_at` is required
+        by the caller and `end_at` mirrors `start_at` (zero-duration pickup).
+        """
+        if slot is None:
+            if start_at is None:
+                raise ValueError("start_at required for takeaway (no slot)")
+            return start_at, end_at or start_at
         default_start, default_end = default_slot_hours(slot, iso_date)  # type: ignore[arg-type]
         return start_at or default_start, end_at or default_end
 
@@ -102,15 +110,21 @@ class ReservationController:
     async def create(
         cls, session: AsyncSession, payload: ReservationCreate
     ) -> Reservation:
-        cls._ensure_guests(payload.adults, payload.children)
+        # Only pool bookings require a guest — takeaways are food-only.
+        if payload.kind == "pool":
+            cls._ensure_guests(payload.adults, payload.children)
         start_at, end_at = cls._resolve_hours(
             payload.slot, payload.date, payload.start_at, payload.end_at
         )
         food_children = min(payload.food_children, payload.food_persons or 0)
+        # For takeaways, force pool guests to zero so the price is food-only
+        # regardless of what the client posted.
+        pool_adults = payload.adults if payload.kind == "pool" else 0
+        pool_children = payload.children if payload.kind == "pool" else 0
         breakdown = compute_total_price(
-            slot=payload.slot,
-            adults=payload.adults,
-            children=payload.children,
+            slot=payload.slot or "afternoon",
+            adults=pool_adults,
+            children=pool_children,
             food_formula=payload.food_formula,
             food_persons=payload.food_persons,
             food_children=food_children,
@@ -120,14 +134,15 @@ class ReservationController:
             extra=payload.extra_amount,
         )
         reservation = Reservation(
+            kind=payload.kind,  # type: ignore[arg-type]
             slot=payload.slot,  # type: ignore[arg-type]
             start_at=start_at,  # type: ignore[arg-type]
             end_at=end_at,  # type: ignore[arg-type]
             customer_name=payload.customer_name.strip(),
             customer_phone=payload.customer_phone.strip(),
             contact_channel=payload.contact_channel,  # type: ignore[arg-type]
-            adults=payload.adults,
-            children=payload.children,
+            adults=pool_adults,
+            children=pool_children,
             babies=payload.babies,
             base_price_pool=breakdown["pool"],  # type: ignore[arg-type]
             food_formula=payload.food_formula,  # type: ignore[arg-type]
@@ -152,7 +167,7 @@ class ReservationController:
         return reservation
 
     @classmethod
-    async def update(  # noqa: PLR0915 — legitimately many partial-update branches
+    async def update(  # noqa: PLR0912, PLR0915 — legitimately many partial-update branches
         cls,
         session: AsyncSession,
         reservation_id: UUID,
@@ -161,7 +176,19 @@ class ReservationController:
         reservation = await cls.get(session, reservation_id)
 
         # Apply field-level overrides, defaulting to the existing value.
-        slot = payload.slot or reservation.slot.value  # type: ignore[union-attr]
+        # `kind` decides whether slot/guests are required.
+        kind = (
+            payload.kind
+            if payload.kind is not None
+            else reservation.kind.value  # type: ignore[union-attr]
+        )
+        # For takeaway, slot is always NULL. For pool, keep existing or overriden.
+        if kind == "takeaway":
+            slot: str | None = None
+        else:
+            slot = payload.slot or (
+                reservation.slot.value if reservation.slot else None  # type: ignore[union-attr]
+            )
         iso_date = payload.date or reservation.start_at.date().isoformat()
         adults = payload.adults if payload.adults is not None else reservation.adults
         children = (
@@ -170,7 +197,12 @@ class ReservationController:
         babies = (
             payload.babies if payload.babies is not None else reservation.babies
         )
-        cls._ensure_guests(adults, children)
+        # Only pool bookings must have at least one guest.
+        if kind == "pool":
+            cls._ensure_guests(adults, children)
+        else:
+            adults = 0
+            children = 0
 
         food_formula = (
             None
@@ -229,10 +261,14 @@ class ReservationController:
         )
 
         start_at, end_at = cls._resolve_hours(
-            slot, iso_date, payload.start_at, payload.end_at
+            slot,
+            iso_date,
+            payload.start_at
+            or (reservation.start_at if kind == "takeaway" else None),
+            payload.end_at,
         )
         breakdown = compute_total_price(
-            slot=slot,  # type: ignore[arg-type]
+            slot=slot or "afternoon",  # dummy for takeaway; pool guests are 0 → pool=0
             adults=adults,
             children=children,
             food_formula=food_formula,  # type: ignore[arg-type]
@@ -244,6 +280,7 @@ class ReservationController:
             extra=Decimal(str(extra)),
         )
 
+        reservation.kind = kind  # type: ignore[assignment]
         reservation.slot = slot  # type: ignore[assignment]
         reservation.start_at = start_at  # type: ignore[assignment]
         reservation.end_at = end_at  # type: ignore[assignment]
