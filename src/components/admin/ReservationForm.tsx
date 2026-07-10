@@ -455,7 +455,9 @@ export function ReservationForm({
   const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
-    if (adults + children < 1) {
+    // Pool bookings need at least one guest to compute anything meaningful;
+    // takeaways are food-only so the estimate must fire even with 0 guests.
+    if (kind === "pool" && adults + children < 1) {
       setBreakdown(null);
       return;
     }
