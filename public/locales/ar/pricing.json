@@ -33,19 +33,9 @@
       "name": "مساء",
       "time": "18h – 22h",
       "description": "غروب الشمس والانتقال إلى أجواء LED.",
-      "small": "22",
-      "medium": "20",
-      "large": "19",
-      "popular": true
-    },
-    "night": {
-      "name": "ليل",
-      "time": "22h – 02h",
-      "description": "تجربة LED غامرة، أجواء فريدة وحميمية.",
-      "small": "24",
-      "medium": "22",
-      "large": "21",
-      "premium": true
+      "small": "20",
+      "medium": "18",
+      "large": "17"
     }
   },
   "perSlot": "/شخص · 4س",

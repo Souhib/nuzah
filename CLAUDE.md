@@ -63,12 +63,17 @@ public/
 
 ### Créneaux (4h chacun) — tarif par personne
 
+Grille uniforme (tous les créneaux au même prix depuis juillet 2026) :
+
 | Créneau | ≤6 pers. | 7-10 | 11-15 |
 |---------|----------|------|-------|
 | Matinée 10h-14h | 20€/pers | 18€/pers | 17€/pers |
 | Après-midi 14h-18h | 20€/pers | 18€/pers | 17€/pers |
-| Soirée 18h-22h | 22€/pers | 20€/pers | 19€/pers |
-| Nuit 22h-02h | 24€/pers | 22€/pers | 21€/pers |
+| Soirée 18h-22h | 20€/pers | 18€/pers | 17€/pers |
+| Nuit 22h-02h *(admin only)* | 20€/pers | 18€/pers | 17€/pers |
+
+Le créneau "Nuit" n'est **plus affiché sur le site vitrine** mais reste disponible dans l'admin.
+Refonte tarifaire prévue : voir [TARIFS-V2.md](./TARIFS-V2.md).
 
 ### Formules repas (sur place)
 - 🥡 Plateaux à partager (mini-burgers, fricassés, bricks…) + thé à la menthe : 14€/pers

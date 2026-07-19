@@ -31,7 +31,7 @@ interface PricingProps {
 
 type GroupSize = "small" | "medium" | "large";
 
-const slotKeys = ["morning", "afternoon", "evening", "night"] as const;
+const slotKeys = ["morning", "afternoon", "evening"] as const;
 
 const slotIcons = {
   morning: Sun,
@@ -278,16 +278,12 @@ export function Pricing({ isNight }: PricingProps) {
                     <div
                       className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center",
-                        slotKey === "night"
+                        slotKey === "evening"
                           ? isNight
-                            ? "bg-[#8B5CF6]/15 text-[#8B5CF6]"
-                            : "bg-purple-100 text-purple-600"
-                          : slotKey === "evening"
-                            ? isNight
-                              ? "bg-[#FF006E]/10 text-[#FF006E]"
-                              : "bg-orange-100 text-orange-600"
-                            : isNight
-                              ? "bg-[#00E5FF]/10 text-[#00E5FF]"
+                            ? "bg-[#FF006E]/10 text-[#FF006E]"
+                            : "bg-orange-100 text-orange-600"
+                          : isNight
+                            ? "bg-[#00E5FF]/10 text-[#00E5FF]"
                               : "bg-[#02BAD6]/10 text-[#02BAD6]"
                       )}
                     >
@@ -338,13 +334,9 @@ export function Pricing({ isNight }: PricingProps) {
                         <span
                           className={cn(
                             "text-4xl font-bold font-heading",
-                            slotKey === "night"
-                              ? isNight
-                                ? "text-[#8B5CF6] glow-text-cyan"
-                                : "text-purple-600"
-                              : isNight
-                                ? "text-[#00E5FF] glow-text-cyan"
-                                : "text-[#02BAD6]"
+                            isNight
+                              ? "text-[#00E5FF] glow-text-cyan"
+                              : "text-[#02BAD6]"
                           )}
                         >
                           {price}€
@@ -368,13 +360,9 @@ export function Pricing({ isNight }: PricingProps) {
                     }}
                     className={cn(
                       "w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer",
-                      slotKey === "night"
-                        ? isNight
-                          ? "bg-[#8B5CF6] text-white hover:bg-[#8B5CF6]/90 glow-violet"
-                          : "bg-purple-600 text-white hover:bg-purple-700 shadow-lg shadow-purple-500/25"
-                        : isNight
-                          ? "bg-[#00E5FF] text-[#070B14] hover:bg-[#00E5FF]/90 glow-cyan"
-                          : "bg-[#02BAD6] text-white hover:bg-[#0891B2] shadow-lg shadow-[#02BAD6]/25"
+                      isNight
+                        ? "bg-[#00E5FF] text-[#070B14] hover:bg-[#00E5FF]/90 glow-cyan"
+                        : "bg-[#02BAD6] text-white hover:bg-[#0891B2] shadow-lg shadow-[#02BAD6]/25"
                     )}
                   >
                     <MessageCircle className="w-4 h-4" />

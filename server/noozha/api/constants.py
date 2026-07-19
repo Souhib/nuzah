@@ -16,14 +16,14 @@ ADULT_PRICE_GRID: dict[str, dict[str, Decimal]] = {
         "large": Decimal("17"),
     },
     "evening": {
-        "small": Decimal("22"),
-        "medium": Decimal("20"),
-        "large": Decimal("19"),
+        "small": Decimal("20"),
+        "medium": Decimal("18"),
+        "large": Decimal("17"),
     },
     "night": {
-        "small": Decimal("24"),
-        "medium": Decimal("22"),
-        "large": Decimal("21"),
+        "small": Decimal("20"),
+        "medium": Decimal("18"),
+        "large": Decimal("17"),
     },
 }
 

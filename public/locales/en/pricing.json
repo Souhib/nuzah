@@ -33,19 +33,9 @@
       "name": "Evening",
       "time": "6pm – 10pm",
       "description": "Sunset vibes and the LED ambiance kicks in.",
-      "small": "22",
-      "medium": "20",
-      "large": "19",
-      "popular": true
-    },
-    "night": {
-      "name": "Night",
-      "time": "10pm – 2am",
-      "description": "Immersive LED experience, unique and intimate atmosphere.",
-      "small": "24",
-      "medium": "22",
-      "large": "21",
-      "premium": true
+      "small": "20",
+      "medium": "18",
+      "large": "17"
     }
   },
   "perSlot": "/person · 4h",

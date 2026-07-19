@@ -33,19 +33,9 @@
       "name": "Soirée",
       "time": "18h – 22h",
       "description": "Coucher de soleil et transition vers l'ambiance LED.",
-      "small": "22",
-      "medium": "20",
-      "large": "19",
-      "popular": true
-    },
-    "night": {
-      "name": "Nuit",
-      "time": "22h – 02h",
-      "description": "Expérience LED immersive, ambiance unique et intime.",
-      "small": "24",
-      "medium": "22",
-      "large": "21",
-      "premium": true
+      "small": "20",
+      "medium": "18",
+      "large": "17"
     }
   },
   "perSlot": "/personne · 4h",
