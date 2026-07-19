@@ -32,8 +32,8 @@ Document de référence pour la refonte des créneaux et de la grille tarifaire.
 | Soirée (19h-23h) | 25€ | 22€ | 18€ |
 
 **Règles** :
-- **Enfants (4-11 ans)** : −50 % du tarif adulte
-- **Bébés (0-3 ans)** : gratuits (informationnel uniquement)
+- **Enfants (moins de 14 ans)** : −50 % du tarif adulte
+- **Bébés (moins de 3 ans)** : gratuits
 - **Pas de floor / minimum** — un couple paie 60€, on assume
 - **Pas de tarif weekend** — grille unique 7j/7
 - **Discounts / arrondis à l'appréciation** de Souhib (fidèles, recommandations, arrondi 67→60 etc.) — le système n'impose rien

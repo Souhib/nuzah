@@ -27,9 +27,10 @@ ADULT_PRICE_GRID: dict[str, dict[str, Decimal]] = {
     },
 }
 
-# Children pay 50% of the adult rate (under 12yo).
+# Children pay 50% of the adult rate (under 14yo — babies under 3 are free).
 CHILD_PRICE_RATIO = Decimal("0.5")
-CHILD_AGE_THRESHOLD_YEARS = 12
+CHILD_AGE_THRESHOLD_YEARS = 14
+BABY_AGE_THRESHOLD_YEARS = 3
 
 # Tier brackets — by TOTAL guest count (adults + children).
 TIER_SMALL_MAX = 6

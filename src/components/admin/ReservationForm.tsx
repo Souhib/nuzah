@@ -852,7 +852,7 @@ export function ReservationForm({
             <Stepper
               label="Enfants"
               icon={Baby}
-              hint="< 12 ans, -50%"
+              hint="< 14 ans, -50%"
               value={children}
               onChange={setChildren}
               min={0}

@@ -20,6 +20,8 @@ import {
   HeartHandshake,
   PartyPopper,
   Package,
+  Baby,
+  PersonStanding,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -373,6 +375,126 @@ export function Pricing({ isNight }: PricingProps) {
             );
           })}
         </div>
+
+        {/* Family policy — babies free, children half price */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className={cn(
+            "mx-auto max-w-3xl mb-12 p-6 rounded-2xl border",
+            isNight
+              ? "bg-white/[0.03] border-white/5"
+              : "bg-white/70 border-gray-200/60 shadow-sm"
+          )}
+        >
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <Users
+              className={cn(
+                "w-4 h-4",
+                isNight ? "text-[#00E5FF]" : "text-[#02BAD6]"
+              )}
+            />
+            <span
+              className={cn(
+                "text-xs uppercase tracking-wider font-semibold",
+                isNight ? "text-gray-300" : "text-gray-600"
+              )}
+            >
+              {t("familyPolicy.title")}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Babies badge */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border flex items-center gap-3",
+                isNight
+                  ? "bg-white/[0.02] border-white/5"
+                  : "bg-white border-gray-200/60"
+              )}
+            >
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                  isNight
+                    ? "bg-[#00E5FF]/10 text-[#00E5FF]"
+                    : "bg-[#02BAD6]/10 text-[#02BAD6]"
+                )}
+              >
+                <Baby className="w-5 h-5" />
+              </div>
+              <div className="text-left min-w-0">
+                <p
+                  className={cn(
+                    "text-[11px] uppercase tracking-wider font-medium",
+                    isNight ? "text-gray-500" : "text-gray-500"
+                  )}
+                >
+                  {t("familyPolicy.babies.label")}
+                </p>
+                <p
+                  className={cn(
+                    "text-lg font-bold font-heading leading-tight",
+                    isNight ? "text-[#00E5FF]" : "text-[#02BAD6]"
+                  )}
+                >
+                  {t("familyPolicy.babies.discount")}
+                </p>
+              </div>
+            </div>
+
+            {/* Children badge */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border flex items-center gap-3",
+                isNight
+                  ? "bg-white/[0.02] border-white/5"
+                  : "bg-white border-gray-200/60"
+              )}
+            >
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                  isNight
+                    ? "bg-[#00E5FF]/10 text-[#00E5FF]"
+                    : "bg-[#02BAD6]/10 text-[#02BAD6]"
+                )}
+              >
+                <PersonStanding className="w-5 h-5" />
+              </div>
+              <div className="text-left min-w-0">
+                <p
+                  className={cn(
+                    "text-[11px] uppercase tracking-wider font-medium",
+                    isNight ? "text-gray-500" : "text-gray-500"
+                  )}
+                >
+                  {t("familyPolicy.children.label")}
+                </p>
+                <p
+                  className={cn(
+                    "text-lg font-bold font-heading leading-tight",
+                    isNight ? "text-[#00E5FF]" : "text-[#02BAD6]"
+                  )}
+                >
+                  {t("familyPolicy.children.discount")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "flex items-center justify-center gap-1.5 mt-4 text-xs",
+              isNight ? "text-gray-500" : "text-gray-500"
+            )}
+          >
+            <Info className="w-3 h-3 flex-shrink-0" />
+            <span>{t("familyPolicy.appliesTo")}</span>
+          </div>
+        </motion.div>
 
         {/* Food Add-on */}
         <motion.div

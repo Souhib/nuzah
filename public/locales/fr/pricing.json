@@ -54,6 +54,18 @@
   "bookSlot": "Réserver ce créneau",
   "popular": "Populaire",
   "premium": "Expérience LED",
+  "familyPolicy": {
+    "title": "Familles bienvenues",
+    "babies": {
+      "label": "Bébés · moins de 3 ans",
+      "discount": "Gratuits"
+    },
+    "children": {
+      "label": "Enfants · moins de 14 ans",
+      "discount": "Moitié prix"
+    },
+    "appliesTo": "Appliqué au tarif piscine et au menu à la personne"
+  },
   "food": {
     "title": "Cuisine maison",
     "subtitle": "Deux formules au choix — la même pour tout le groupe.",

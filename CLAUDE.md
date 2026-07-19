@@ -72,6 +72,11 @@ Grille uniforme (tous les créneaux au même prix depuis juillet 2026) :
 | Soirée 18h-22h | 20€/pers | 18€/pers | 17€/pers |
 | Nuit 22h-02h *(admin only)* | 20€/pers | 18€/pers | 17€/pers |
 
+**Politique âges** :
+- **Bébés** (moins de 3 ans) : gratuits
+- **Enfants** (moins de 14 ans) : moitié prix
+- S'applique au tarif piscine et au menu à la personne (le plateau à partager reste un forfait).
+
 Le créneau "Nuit" n'est **plus affiché sur le site vitrine** mais reste disponible dans l'admin.
 Refonte tarifaire prévue : voir [TARIFS-V2.md](./TARIFS-V2.md).
 

@@ -54,6 +54,18 @@
   "bookSlot": "Book this slot",
   "popular": "Popular",
   "premium": "LED Experience",
+  "familyPolicy": {
+    "title": "Families welcome",
+    "babies": {
+      "label": "Babies · under 3",
+      "discount": "Free"
+    },
+    "children": {
+      "label": "Children · under 14",
+      "discount": "Half price"
+    },
+    "appliesTo": "Applied to pool pricing and the per-person menu"
+  },
   "food": {
     "title": "Homemade kitchen",
     "subtitle": "Two formulas to pick from — the whole group shares the same one.",
