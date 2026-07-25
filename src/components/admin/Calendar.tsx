@@ -96,13 +96,30 @@ const MONTH_NAMES_FULL = [
   "décembre",
 ];
 
-const ALL_SLOTS: Slot[] = ["morning", "afternoon", "evening", "night"];
-const SLOT_HOUR_LABELS: Record<Slot, string> = {
-  morning: "Matinée (10h-14h)",
-  afternoon: "Après-midi (14h-18h)",
-  evening: "Soirée (18h-22h)",
-  night: "Nuit (22h-02h)",
-};
+// Slot registry used by the availability sharing algorithm.
+// Night is intentionally excluded — the share message no longer offers
+// it as a standard slot (per business decision), though custom-hour
+// bookings can still surface late-hour windows via the algorithm below.
+interface StandardSlot {
+  label: string;
+  startMin: number;
+  endMin: number;
+}
+const STANDARD_SLOTS: readonly StandardSlot[] = [
+  { label: "Matinée", startMin: 10 * 60, endMin: 14 * 60 },
+  { label: "Après-midi", startMin: 14 * 60, endMin: 18 * 60 },
+  { label: "Soirée", startMin: 18 * 60, endMin: 22 * 60 },
+];
+// Day window used by the availability computation. Late hours are still
+// eligible for custom windows (e.g. 20h30-00h30) even though "Nuit" as a
+// standard slot is retired.
+const DAY_START_MIN = 10 * 60; // 10h
+const DAY_END_MIN = 26 * 60; // 02h next day
+const SLOT_LEN_MIN = 4 * 60; // 4h
+const CLEANUP_BUFFER_MIN = 30; // 30 min buffer after each booking
+// If a residual free window starts at or after 22h AND doesn't match any
+// standard slot, treat it as the retired Nuit slot and drop it.
+const NIGHT_ZONE_MIN = 22 * 60;
 
 const CHANNEL_ICONS: Record<ContactChannel, typeof Phone> = {
   whatsapp: MessageCircle,
@@ -269,11 +286,101 @@ function formatWeekRangeLong(monday: Date): string {
   return `du ${monday.getDate()} ${MONTH_NAMES_FULL[monday.getMonth()]} au ${sunday.getDate()} ${MONTH_NAMES_FULL[sunday.getMonth()]}`;
 }
 
+/** Minutes since local midnight for a wall-clock time. */
+function minutesOfDay(d: Date): number {
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+/** "10h" / "14h30" / "00h30" — clock time from minutes past midnight (may
+ * exceed 24h to represent post-midnight late-night slots). */
+function formatMinutes(min: number): string {
+  const total = min % (24 * 60);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
+}
+
+interface AvailWindow {
+  startMin: number;
+  endMin: number;
+}
+interface AvailLine {
+  label: string | null; // "Matinée", "Après-midi", … or null for custom
+  startMin: number;
+  endMin: number;
+}
+
+/** Convert a day's non-cancelled reservations to sorted [start, end] intervals
+ * in minutes-past-midnight of that day. Handles bookings that cross midnight
+ * (endMin > 24*60). */
+function bookingsToIntervals(bucket: DayBucket): AvailWindow[] {
+  return bucket.all
+    .filter((r) => r.status !== "cancelled")
+    .map((r) => {
+      const s = new Date(r.start_at);
+      const e = new Date(r.end_at);
+      const startMin = minutesOfDay(s);
+      let endMin = minutesOfDay(e);
+      // End earlier than start → crossed midnight; also handle end date on next day
+      if (endMin <= startMin) endMin += 24 * 60;
+      return { startMin, endMin };
+    })
+    .sort((a, b) => a.startMin - b.startMin);
+}
+
+/** Compute the contiguous free windows in a day, given its bookings.
+ * Each booking is expanded by CLEANUP_BUFFER_MIN afterwards. */
+function computeFreeWindows(intervals: AvailWindow[]): AvailWindow[] {
+  const free: AvailWindow[] = [];
+  let cursor = DAY_START_MIN;
+  for (const b of intervals) {
+    if (b.startMin > cursor) {
+      free.push({ startMin: cursor, endMin: b.startMin });
+    }
+    cursor = Math.max(cursor, b.endMin + CLEANUP_BUFFER_MIN);
+  }
+  if (cursor < DAY_END_MIN) {
+    free.push({ startMin: cursor, endMin: DAY_END_MIN });
+  }
+  return free;
+}
+
+/** For a single free window, emit displayable lines: standard slots that
+ * fit fully into it (with their canonical name) plus, at most, one custom
+ * 4h chunk from any remaining time. Late-hour residuals in the retired
+ * Nuit zone (starting ≥ 22h without matching a slot) are silently dropped. */
+function processFreeWindow(w: AvailWindow): AvailLine[] {
+  const items: AvailLine[] = [];
+  let cur = w.startMin;
+  for (const slot of STANDARD_SLOTS) {
+    if (cur <= slot.startMin && w.endMin >= slot.endMin) {
+      items.push({ label: slot.label, startMin: slot.startMin, endMin: slot.endMin });
+      cur = slot.endMin;
+    }
+  }
+  if (w.endMin - cur >= SLOT_LEN_MIN && cur < NIGHT_ZONE_MIN) {
+    items.push({
+      label: null,
+      startMin: cur,
+      endMin: Math.min(w.endMin, cur + SLOT_LEN_MIN),
+    });
+  }
+  return items;
+}
+
 /**
  * Build the WhatsApp-friendly availability message for a week. Days strictly
  * before `today` (00:00) are skipped so a mid-week share only lists the days
- * still in play. Slots with a `pending`/`confirmed` reservation count as
- * booked; `cancelled` rows are ignored (slot goes back to free).
+ * still in play.
+ *
+ * Availability model:
+ * - Day = [10h, 02h next day] — 16h continuous, but the retired "Nuit" fixed
+ *   slot is never offered on its own.
+ * - Cancelled reservations are ignored (slot returns to free).
+ * - Each booking blocks its [start, end] plus CLEANUP_BUFFER_MIN (30 min)
+ *   afterwards, so the next available window starts 30 min after checkout.
+ * - Free windows ≥ 4h are labelled as standard slots when they fully cover
+ *   Matinée / Après-midi / Soirée, otherwise as a raw "20h30-00h30" range.
  */
 function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string {
   const todayStart = new Date(today);
@@ -292,29 +399,36 @@ function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string
   lines.push(`Dispos semaine ${formatWeekRangeLong(monday)} 🏊`);
   lines.push("");
 
-  let allComplet = true;
+  let anyFree = false;
   for (const bucket of upcoming) {
-    const busySlots = new Set<Slot>();
-    for (const slot of ALL_SLOTS) {
-      const rs = bucket.bySlot[slot] ?? [];
-      if (rs.some((r) => r.status !== "cancelled")) busySlots.add(slot);
-    }
-    const freeSlots = ALL_SLOTS.filter((s) => !busySlots.has(s));
+    const intervals = bookingsToIntervals(bucket);
+    const free = computeFreeWindows(intervals);
+    const displayItems: AvailLine[] = [];
+    for (const w of free) displayItems.push(...processFreeWindow(w));
+
     const dayLabel = formatDayLong(bucket.date);
-    if (freeSlots.length === 0) {
+    if (displayItems.length === 0) {
       lines.push(`*${dayLabel}* — complet`);
     } else {
-      allComplet = false;
+      anyFree = true;
       lines.push(`*${dayLabel}*`);
-      for (const s of freeSlots) lines.push(`✓ ${SLOT_HOUR_LABELS[s]}`);
+      for (const item of displayItems) {
+        const startStr = formatMinutes(item.startMin);
+        const endStr = formatMinutes(item.endMin);
+        if (item.label) {
+          lines.push(`✓ ${item.label} (${startStr}-${endStr})`);
+        } else {
+          lines.push(`✓ ${startStr}-${endStr}`);
+        }
+      }
     }
     lines.push("");
   }
 
   lines.push(
-    allComplet
-      ? "Semaine complète pour l'instant — dis-moi si tu veux être sur liste d'attente 🌸"
-      : "Fais-moi signe pour bloquer un créneau 🌸",
+    anyFree
+      ? "Fais-moi signe pour bloquer un créneau 🌸"
+      : "Semaine complète pour l'instant — dis-moi si tu veux être sur liste d'attente 🌸",
   );
   return lines.join("\n");
 }
