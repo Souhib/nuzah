@@ -399,7 +399,6 @@ function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string
   lines.push(`Dispos semaine ${formatWeekRangeLong(monday)} 🏊`);
   lines.push("");
 
-  let anyFree = false;
   for (const bucket of upcoming) {
     const intervals = bookingsToIntervals(bucket);
     const free = computeFreeWindows(intervals);
@@ -410,7 +409,6 @@ function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string
     if (displayItems.length === 0) {
       lines.push(`*${dayLabel}* — complet`);
     } else {
-      anyFree = true;
       lines.push(`*${dayLabel}*`);
       for (const item of displayItems) {
         const startStr = formatMinutes(item.startMin);
@@ -425,12 +423,7 @@ function buildDispoMessage(monday: Date, days: DayBucket[], today: Date): string
     lines.push("");
   }
 
-  lines.push(
-    anyFree
-      ? "Fais-moi signe pour bloquer un créneau 🌸"
-      : "Semaine complète pour l'instant — dis-moi si tu veux être sur liste d'attente 🌸",
-  );
-  return lines.join("\n");
+  return lines.join("\n").replace(/\n+$/, "");
 }
 
 export function Calendar({
