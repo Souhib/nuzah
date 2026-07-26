@@ -345,10 +345,20 @@ function computeFreeWindows(intervals: AvailWindow[]): AvailWindow[] {
   return free;
 }
 
+/** Pick a friendly slot name for a shifted/custom window based on when it
+ * starts. Extends Soirée to cover late starts (≥ 18h) since the standard
+ * Nuit slot has been retired. */
+function labelForCustomWindow(startMin: number): string {
+  if (startMin < 14 * 60) return "Matinée";
+  if (startMin < 18 * 60) return "Après-midi";
+  return "Soirée";
+}
+
 /** For a single free window, emit displayable lines: standard slots that
  * fit fully into it (with their canonical name) plus, at most, one custom
- * 4h chunk from any remaining time. Late-hour residuals in the retired
- * Nuit zone (starting ≥ 22h without matching a slot) are silently dropped. */
+ * 4h chunk from any remaining time — labelled with a friendly slot name
+ * derived from its start hour. Late-hour residuals in the retired Nuit
+ * zone (starting ≥ 22h without matching a slot) are silently dropped. */
 function processFreeWindow(w: AvailWindow): AvailLine[] {
   const items: AvailLine[] = [];
   let cur = w.startMin;
@@ -360,7 +370,7 @@ function processFreeWindow(w: AvailWindow): AvailLine[] {
   }
   if (w.endMin - cur >= SLOT_LEN_MIN && cur < NIGHT_ZONE_MIN) {
     items.push({
-      label: null,
+      label: labelForCustomWindow(cur),
       startMin: cur,
       endMin: Math.min(w.endMin, cur + SLOT_LEN_MIN),
     });
