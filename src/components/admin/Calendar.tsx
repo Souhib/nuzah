@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ComponentType, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ApiError,
@@ -27,7 +27,6 @@ import {
   History,
   Instagram,
   Loader2,
-  MessageCircle,
   MoreHorizontal,
   Pencil,
   Phone,
@@ -41,6 +40,7 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 interface CalendarProps {
   token: string;
@@ -121,8 +121,14 @@ const CLEANUP_BUFFER_MIN = 30; // 30 min buffer after each booking
 // standard slot, treat it as the retired Nuit slot and drop it.
 const NIGHT_ZONE_MIN = 22 * 60;
 
-const CHANNEL_ICONS: Record<ContactChannel, typeof Phone> = {
-  whatsapp: MessageCircle,
+// Icons are a mix of lucide (line-art) and custom brand SVGs — both accept
+// the standard SVG props we care about (className, aria-label).
+type ChannelIconComponent = ComponentType<{
+  className?: string;
+  "aria-label"?: string;
+}>;
+const CHANNEL_ICONS: Record<ContactChannel, ChannelIconComponent> = {
+  whatsapp: WhatsAppIcon,
   instagram: Instagram,
   phone: Phone,
   other: MoreHorizontal,

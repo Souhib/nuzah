@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ComponentType, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { DayPicker } from "react-day-picker";
 import { fr } from "react-day-picker/locale";
@@ -32,7 +32,6 @@ import {
   HandCoins,
   Instagram,
   Loader2,
-  MessageCircle,
   Minus,
   Moon,
   MoreHorizontal,
@@ -52,6 +51,7 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 interface ReservationFormProps {
   token: string;
@@ -85,12 +85,14 @@ const DEPOSIT_METHODS: { value: DepositMethod; label: string }[] = [
   { value: "other", label: "Autre" },
 ];
 
+// Mix of lucide (line-art) and custom brand SVGs — both accept className.
+type ChannelIconComponent = ComponentType<{ className?: string }>;
 const CONTACT_CHANNELS: {
   value: ContactChannel;
   label: string;
-  Icon: typeof Phone;
+  Icon: ChannelIconComponent;
 }[] = [
-  { value: "whatsapp", label: "WhatsApp", Icon: MessageCircle },
+  { value: "whatsapp", label: "WhatsApp", Icon: WhatsAppIcon },
   { value: "instagram", label: "Instagram", Icon: Instagram },
   { value: "phone", label: "Téléphone", Icon: Phone },
   { value: "other", label: "Autre", Icon: MoreHorizontal },
