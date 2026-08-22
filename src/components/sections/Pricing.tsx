@@ -13,13 +13,11 @@ import {
   Eye,
   MessageCircle,
   Clock,
-  ChefHat,
   Info,
   Wallet,
   CalendarX,
   HeartHandshake,
   PartyPopper,
-  Package,
   Baby,
   PersonStanding,
 } from "lucide-react";
@@ -496,16 +494,16 @@ export function Pricing({ isNight }: PricingProps) {
           </div>
         </motion.div>
 
-        {/* Food Add-on */}
+        {/* Events */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.65 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
           className={cn(
-            "mb-12 p-8 rounded-3xl border",
+            "flex flex-col p-8 rounded-3xl border mb-12",
             isNight
-              ? "bg-gradient-to-br from-amber-950/10 to-orange-950/10 border-amber-500/10"
-              : "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/40"
+              ? "bg-gradient-to-br from-pink-950/10 to-rose-950/10 border-pink-500/10"
+              : "bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200/40"
           )}
         >
           <div className="flex items-center gap-3 mb-2">
@@ -513,11 +511,11 @@ export function Pricing({ isNight }: PricingProps) {
               className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center",
                 isNight
-                  ? "bg-amber-500/15 text-amber-400"
-                  : "bg-amber-100 text-amber-600"
+                  ? "bg-pink-500/15 text-pink-400"
+                  : "bg-pink-100 text-pink-600"
               )}
             >
-              <ChefHat className="w-5 h-5" />
+              <PartyPopper className="w-5 h-5" />
             </div>
             <div>
               <h3
@@ -526,254 +524,53 @@ export function Pricing({ isNight }: PricingProps) {
                   isNight ? "text-white" : "text-[#0A1628]"
                 )}
               >
-                {t("food.title")}
+                {t("events.title")}
               </h3>
               <p
                 className={cn(
                   "text-sm italic",
-                  isNight ? "text-amber-400/70" : "text-amber-700/70"
+                  isNight ? "text-pink-400/70" : "text-pink-700/70"
                 )}
               >
-                {t("food.subtitle")}
+                {t("events.subtitle")}
               </p>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mt-6">
-            {(
-              t("food.items", { returnObjects: true }) as {
-                name: string;
-                description: string;
-                price: string;
-                unit?: string;
-              }[]
-            ).map((item) => (
-              <div
-                key={item.name}
-                className={cn(
-                  "p-5 rounded-2xl border transition-all duration-300",
-                  isNight
-                    ? "bg-white/[0.03] border-white/5 hover:border-amber-500/20"
-                    : "bg-white/80 border-amber-200/30 hover:border-amber-300 hover:shadow-md"
-                )}
-              >
-                <h4
-                  className={cn(
-                    "font-semibold text-base",
-                    isNight ? "text-white" : "text-[#0A1628]"
-                  )}
-                >
-                  {item.name}
-                </h4>
-                <p
-                  className={cn(
-                    "text-xs mt-1 mb-4",
-                    isNight ? "text-gray-400" : "text-gray-500"
-                  )}
-                >
-                  {item.description}
-                </p>
-                <div className="flex items-baseline gap-1">
-                  <span
-                    className={cn(
-                      "text-2xl font-bold font-heading",
-                      isNight ? "text-amber-400" : "text-amber-600"
-                    )}
-                  >
-                    {item.price}€
-                  </span>
-                  <span
-                    className={cn(
-                      "text-xs",
-                      isNight ? "text-gray-500" : "text-gray-400"
-                    )}
-                  >
-                    {item.unit ?? t("food.perPerson")}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p
+            className={cn(
+              "text-sm leading-relaxed mt-4",
+              isNight ? "text-gray-400" : "text-gray-600"
+            )}
+          >
+            {t("events.description")}
+          </p>
 
           <div
             className={cn(
-              "flex items-center gap-2 mt-5 text-xs",
-              isNight ? "text-gray-500" : "text-gray-400"
+              "text-xs font-medium mt-3 mb-6 space-y-1",
+              isNight ? "text-pink-400/60" : "text-pink-700/60"
             )}
           >
-            <Info className="w-3.5 h-3.5 flex-shrink-0" />
-            {t("food.notice")}
+            <p>{t("events.examplesCeremonies")}</p>
+            <p>{t("events.examplesFestivals")}</p>
           </div>
 
-          <div
+          <button
+            onClick={() => {
+              window.open(WHATSAPP_URL, "_blank");
+            }}
             className={cn(
-              "flex items-start gap-2 mt-2 text-xs",
-              isNight ? "text-amber-400/70" : "text-amber-700/70"
+              "mt-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer",
+              isNight
+                ? "bg-pink-500 text-white hover:bg-pink-500/90"
+                : "bg-pink-500 text-white hover:bg-pink-600 shadow-lg shadow-pink-500/25"
             )}
           >
-            <HeartHandshake className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-            {t("food.adaptable")}
-          </div>
+            <MessageCircle className="w-4 h-4" />
+            {t("events.cta")}
+          </button>
         </motion.div>
-
-        {/* Events & Takeaway */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {/* Events */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            className={cn(
-              "flex flex-col p-8 rounded-3xl border",
-              isNight
-                ? "bg-gradient-to-br from-pink-950/10 to-rose-950/10 border-pink-500/10"
-                : "bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200/40"
-            )}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center",
-                  isNight
-                    ? "bg-pink-500/15 text-pink-400"
-                    : "bg-pink-100 text-pink-600"
-                )}
-              >
-                <PartyPopper className="w-5 h-5" />
-              </div>
-              <div>
-                <h3
-                  className={cn(
-                    "text-lg font-semibold",
-                    isNight ? "text-white" : "text-[#0A1628]"
-                  )}
-                >
-                  {t("events.title")}
-                </h3>
-                <p
-                  className={cn(
-                    "text-sm italic",
-                    isNight ? "text-pink-400/70" : "text-pink-700/70"
-                  )}
-                >
-                  {t("events.subtitle")}
-                </p>
-              </div>
-            </div>
-
-            <p
-              className={cn(
-                "text-sm leading-relaxed mt-4",
-                isNight ? "text-gray-400" : "text-gray-600"
-              )}
-            >
-              {t("events.description")}
-            </p>
-
-            <div
-              className={cn(
-                "text-xs font-medium mt-3 mb-6 space-y-1",
-                isNight ? "text-pink-400/60" : "text-pink-700/60"
-              )}
-            >
-              <p>{t("events.examplesCeremonies")}</p>
-              <p>{t("events.examplesFestivals")}</p>
-            </div>
-
-            <button
-              onClick={() => {
-                window.open(WHATSAPP_URL, "_blank");
-              }}
-              className={cn(
-                "mt-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer",
-                isNight
-                  ? "bg-pink-500 text-white hover:bg-pink-500/90"
-                  : "bg-pink-500 text-white hover:bg-pink-600 shadow-lg shadow-pink-500/25"
-              )}
-            >
-              <MessageCircle className="w-4 h-4" />
-              {t("events.cta")}
-            </button>
-          </motion.div>
-
-          {/* Takeaway */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.75 }}
-            className={cn(
-              "flex flex-col p-8 rounded-3xl border",
-              isNight
-                ? "bg-gradient-to-br from-lime-950/10 to-green-950/10 border-lime-500/10"
-                : "bg-gradient-to-br from-lime-50 to-green-50 border-lime-200/40"
-            )}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center",
-                  isNight
-                    ? "bg-lime-500/15 text-lime-400"
-                    : "bg-lime-100 text-lime-600"
-                )}
-              >
-                <Package className="w-5 h-5" />
-              </div>
-              <div>
-                <h3
-                  className={cn(
-                    "text-lg font-semibold",
-                    isNight ? "text-white" : "text-[#0A1628]"
-                  )}
-                >
-                  {t("takeaway.title")}
-                </h3>
-                <p
-                  className={cn(
-                    "text-sm italic",
-                    isNight ? "text-lime-400/70" : "text-lime-700/70"
-                  )}
-                >
-                  {t("takeaway.subtitle")}
-                </p>
-              </div>
-            </div>
-
-            <p
-              className={cn(
-                "text-sm leading-relaxed mt-4",
-                isNight ? "text-gray-400" : "text-gray-600"
-              )}
-            >
-              {t("takeaway.description")}
-            </p>
-
-            <div
-              className={cn(
-                "text-xs font-medium mt-3 mb-6 space-y-1",
-                isNight ? "text-lime-400/60" : "text-lime-700/60"
-              )}
-            >
-              <p>{t("takeaway.examplesSavoury")}</p>
-              <p>{t("takeaway.examplesSweet")}</p>
-            </div>
-
-            <button
-              onClick={() => {
-                window.open(WHATSAPP_URL, "_blank");
-              }}
-              className={cn(
-                "mt-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer",
-                isNight
-                  ? "bg-lime-500 text-[#070B14] hover:bg-lime-500/90"
-                  : "bg-lime-500 text-white hover:bg-lime-600 shadow-lg shadow-lime-500/25"
-              )}
-            >
-              <MessageCircle className="w-4 h-4" />
-              {t("takeaway.cta")}
-            </button>
-          </motion.div>
-        </div>
 
         {/* Included Features */}
         <motion.div

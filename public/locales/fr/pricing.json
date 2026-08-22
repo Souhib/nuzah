@@ -45,7 +45,7 @@
     "Transats & mobilier de jardin",
     "Douche & toilettes",
     "Wi-Fi gratuit",
-    "Snacks & boissons offerts",
+    "Boissons offertes",
     "Enceinte Bluetooth",
     "Table de ping-pong & hamac",
     "Nintendo Switch & jeux de société",
@@ -64,44 +64,15 @@
       "label": "Enfants · moins de 14 ans",
       "discount": "Moitié prix"
     },
-    "appliesTo": "Appliqué au tarif piscine et au menu à la personne"
-  },
-  "food": {
-    "title": "Cuisine maison",
-    "subtitle": "Deux formules au choix — la même pour tout le groupe.",
-    "notice": "À commander 48h à l'avance · Minimum 6 personnes · Une seule formule par groupe",
-    "adaptable": "Menu adapté à vos préférences (allergies, choix…) — précisez à la commande",
-    "perPerson": "/personne",
-    "items": [
-      {
-        "name": "Plateaux à partager",
-        "description": "Un plateau d'environ 40 pièces salées selon l'inspiration du chef ou sur demande (mini-burgers, fricassés, bricks…) + thé à la menthe — à partager au bord de la piscine",
-        "price": "30",
-        "unit": "/plateau"
-      },
-      {
-        "name": "Menu traditionnel",
-        "description": "Entrée + plat principal selon l'inspiration du chef ou sur demande (couscous, tajine, pizzas…) + thé à la menthe",
-        "price": "19",
-        "unit": "/personne"
-      }
-    ]
+    "appliesTo": "Appliqué au tarif piscine"
   },
   "events": {
     "title": "Cérémonies & Événements",
     "subtitle": "Fêtes, célébrations...",
-    "description": "Vous souhaitez organiser une cérémonie ou un événement privé au bord de la piscine ? Fêtes entre amis, célébrations familiales... Tout est possible ! Profitez d'un espace privatif avec piscine, restauration sur place et un cadre idéal pour créer des souvenirs inoubliables. Contactez-nous directement par WhatsApp ou message pour discuter des modalités et organiser votre événement sur mesure.",
+    "description": "Vous souhaitez organiser une cérémonie ou un événement privé au bord de la piscine ? Fêtes entre amis, célébrations familiales... Tout est possible ! Profitez d'un espace privatif avec piscine et un cadre idéal pour créer des souvenirs inoubliables. Contactez-nous directement par WhatsApp ou message pour discuter des modalités et organiser votre événement sur mesure.",
     "examplesCeremonies": "Cérémonies : diplômes, fiançailles, aqiqas...",
     "examplesFestivals": "Fêtes : soirées privées, hennés...",
     "cta": "Nous contacter"
-  },
-  "takeaway": {
-    "title": "Commandes à emporter",
-    "subtitle": "Préparées maison, à récupérer sur place.",
-    "description": "Envie de repartir avec un plateau de gourmandises après votre baignade, ou simplement commander sans réserver la piscine ? Nous préparons sur commande des mini sandwichs, mini burgers, sandwichs fricassés et bien d'autres choses. Contactez-nous par WhatsApp ou message pour passer commande et convenir des modalités.",
-    "examplesSavoury": "Salé : mini sandwichs, mini burgers, sandwichs fricassés et plus",
-    "examplesSweet": "Sucré : crêpes, beignets et plus",
-    "cta": "Commander"
   },
   "booking": {
     "title": "Réservation & Annulation",

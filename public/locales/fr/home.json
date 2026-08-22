@@ -25,8 +25,6 @@
       "privateDesc": "Aucun autre invité — l'espace est entièrement à vous.",
       "led": "Ambiance LED",
       "ledDesc": "Éclairage LED immersif pour des soirées féeriques.",
-      "food": "Options Restauration",
-      "foodDesc": "Repas fait maison disponible en supplément.",
       "music": "Enceinte Bluetooth",
       "musicDesc": "Ambiance musicale à votre goût.",
       "pingpong": "Table de Ping-Pong",
@@ -43,9 +41,6 @@
     "sectionTitle": "Galerie",
     "title": "Découvrez l'espace",
     "dayLabel": "Ambiance jour",
-    "foodLabel": "Repas",
-    "foodPlatterLabel": "Plateau fait maison",
-    "foodBurgersLabel": "Mini burgers & fricassés",
     "poolPurpleLabel": "Piscine ambiance violette",
     "gardenPoolNightLabel": "Jardin & piscine la nuit",
     "gardenHammockLabel": "Hamac sous l'olivier",
@@ -79,7 +74,7 @@
   "contact": {
     "sectionTitle": "Contact",
     "title": "Prêt à plonger ?",
-    "subtitle": "Réservation d'un créneau ou commande à emporter — réponse rapide garantie."
+    "subtitle": "Réservation d'un créneau — réponse rapide garantie."
   },
   "faq": {
     "sectionTitle": "FAQ",
@@ -95,11 +90,7 @@
       },
       {
         "q": "Que faut-il apporter ?",
-        "a": "Apportez votre maillot de bain et vos serviettes. Des snacks et boissons sont offerts sur place. Tout le reste est fourni : transats, enceinte Bluetooth, jeux de société, Nintendo Switch, table de ping-pong et hamac."
-      },
-      {
-        "q": "Peut-on manger sur place ?",
-        "a": "Des snacks et boissons sont inclus dans chaque créneau. En supplément, deux formules de cuisine maison au choix du groupe (la même pour tout le monde), selon l'inspiration du chef ou sur demande : Plateaux à partager (mini-burgers, fricassés, bricks…) à 30€ le plateau (environ 40 pièces), ou Menu traditionnel (entrée + couscous, tajine, pizzas… + thé à la menthe) à 19€/pers. À commander 48h à l'avance, minimum 6 personnes. Menu adapté à vos préférences (allergies, choix…) — précisez à la commande."
+        "a": "Apportez votre maillot de bain et vos serviettes. Des boissons sont offertes sur place. Tout le reste est fourni : transats, enceinte Bluetooth, jeux de société, Nintendo Switch, table de ping-pong et hamac."
       },
       {
         "q": "Y a-t-il un parking ?",
@@ -120,10 +111,6 @@
       {
         "q": "Peut-on organiser une cérémonie ou un événement ?",
         "a": "Oui ! Fêtes, célébrations familiales... nous accueillons tout type d'événement privé au bord de la piscine. Contactez-nous par WhatsApp ou message pour discuter des modalités et organiser votre événement sur mesure."
-      },
-      {
-        "q": "Proposez-vous de la nourriture à emporter ?",
-        "a": "Oui ! Que vous veniez profiter de la piscine et souhaitiez repartir avec un plateau, ou que vous vouliez simplement commander à emporter, nous préparons sur commande des mini sandwichs, mini burgers, sandwichs fricassés et bien d'autres choses. Contactez-nous par WhatsApp ou message pour passer commande et convenir des modalités."
       },
       {
         "q": "L'alcool est-il autorisé ?",

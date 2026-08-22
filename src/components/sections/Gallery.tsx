@@ -49,24 +49,6 @@ const galleryItems: GalleryItem[] = [
     poster: "/images/garden-pool-night-poster.jpg",
     variant: "hero",
   },
-  {
-    key: "foodLabel",
-    type: "video",
-    src: "/videos/food-setup.mp4",
-    poster: "/images/food-setup.jpg",
-  },
-  {
-    key: "foodPlatterLabel",
-    type: "video",
-    src: "/videos/food-platter.mp4",
-    poster: "/images/food-platter.jpg",
-  },
-  {
-    key: "foodBurgersLabel",
-    type: "video",
-    src: "/videos/food-burgers.mp4",
-    poster: "/images/food-burgers.jpg",
-  },
 ];
 
 export function Gallery({ isNight }: GalleryProps) {

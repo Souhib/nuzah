@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Lock, Lightbulb, UtensilsCrossed, Waves, Speaker } from "lucide-react";
+import { Lock, Lightbulb, Waves, Speaker } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExperienceProps {
@@ -36,11 +36,6 @@ export function Experience({ isNight }: ExperienceProps) {
       icon: Lightbulb,
       title: t("experience.features.led"),
       desc: t("experience.features.ledDesc"),
-    },
-    {
-      icon: UtensilsCrossed,
-      title: t("experience.features.food"),
-      desc: t("experience.features.foodDesc"),
     },
     {
       icon: Speaker,
